@@ -5,10 +5,13 @@ class FSM {
 private:
 
 public:
-  FSM() = default;
-  void gotoState();
+  FSM();
+  ~FSM();
+  static void gotoState();
   
 private:
+  static FSM* instance;
+  
   enum State
   {
     LINE_NONE,       // proceed until line found
@@ -39,4 +42,6 @@ private:
   bool checkForLine();
   
   unsigned long t_mark; // timer
+
+  int gsv[5] = {0, 0, 0, 0, 0};
 };

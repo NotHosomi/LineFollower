@@ -1,14 +1,15 @@
 #pragma once
 #include "defines.h"
+#include <Arduino.h>
 
 // Class to operate the motor(s).
 // Motor manager
 class Motors {
   public:
   // Constructor, must exist.
-  Motors_c() {}
+  Motors() {}
   
-  static void initialise() {
+  static void init() {
     pinMode(L_PWM_PIN, OUTPUT);
     pinMode(R_PWM_PIN, OUTPUT);
     pinMode(R_DIR_PIN, OUTPUT);

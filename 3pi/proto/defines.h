@@ -1,7 +1,5 @@
 #pragma once
 
-#define SERIAL true
-
 // Pins
 #define R_PWM_PIN 9 // A9
 #define L_PWM_PIN 10 // A10
@@ -20,7 +18,6 @@
 #define REV HIGH
 
 // Magic Numbers
-#define SPEED 20
 #define GS_COUNT 5
 #define GS_WHITE 830  // TODO: make dynamic
 #define GS_BLACK 305
