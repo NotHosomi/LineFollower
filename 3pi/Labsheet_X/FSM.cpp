@@ -16,15 +16,15 @@ FSM::bool checkForLine()
 /*--------------------
      LINE MISSING
 ----------------------*/
-#define BACKTRACK_THRESH 2 //secs
+#define BACKTRACK_THRESH 2000000 // 2 secs
 void FSM::onLineMissing()
 {
   printf("State: LINE_MISSING\n");
   state = LINE_MISSING;
-  t_mark = wb_robot_get_time();
-  
-  wb_motor_set_velocity(right_motor, SPEED);
-  wb_motor_set_velocity(left_motor, SPEED);
+  t_mark = micros();
+
+  Motors::setRMotor(SPEED);
+  Motors::setLMotor(SPEED);
 }
 void FSM::lineMissing()
 {
@@ -33,25 +33,25 @@ void FSM::lineMissing()
     onLineFollow();
     return;
   }
-  if(wb_robot_get_time() - t_mark > BACKTRACK_THRESH)
+  if(micros() - t_mark > BACKTRACK_THRESH)
     onLineLostTurn();
 }
 
 /*--------------------
        LINE LOST
 ----------------------*/
-#define LLTURN_THRESH 0.5f
+#define LLTURN_THRESH 500000 // 0.5 secs
 void FSM::onLineLostTurn()
 {
   printf("State: LINE_LOST_TURN\n");
-  t_mark = wb_robot_get_time();
-  wb_motor_set_velocity(right_motor, SPEED);
-  wb_motor_set_velocity(left_motor, -SPEED);
+  t_mark = micros();
+  Motors::setRMotor(SPEED);
+  Motors::setLMotor(-SPEED);
 }
 void FSM::lineLostTurn()
 {
   // No change in actions until timer elapses
-  if(wb_robot_get_time() - t_mark > LLTURN_THRESH)
+  if(micros() - t_mark > LLTURN_THRESH)
     onLineLostTravel();
 }
 void FSM::onLineLostTravel()
@@ -74,7 +74,7 @@ void FSM::lineLostTravel()
 /*--------------------
      LINE JOINING
 ----------------------*/
-#define JOIN_TURN_TIME 3.0f
+#define JOIN_TURN_TIME 3000000 // 3 secs
 void FSM::lineNone()
 {
   if(checkForLine())
@@ -87,11 +87,11 @@ void FSM::onLineJoin()
 {
   printf("State: LINE_JOIN\n");
   state = LINE_JOIN;
-  t_mark = wb_robot_get_time();
+  t_mark = micros();
 }
 void FSM::lineJoin()
 {
-  if(wb_robot_get_time() - t_mark > JOIN_TURN_TIME)
+  if(micros() - t_mark > JOIN_TURN_TIME)
   {
     onLineFollow();
     return;
@@ -124,7 +124,7 @@ void FSM::lineFollow()
   
   if(gsv[GSL] >= GS_WHITE &&
      gsv[GSC] >= GS_WHITE &&
-     gsv[GSR] >= GS_WHITE)
+     gsv[GSR] >= GS_WHITE) // what about just if(!checkForLine())
   {
     onLineMissing();
     return;
@@ -162,7 +162,7 @@ void FSM::lineTurn()
 ----------------------*/
 void FSM::gotoState()
 {
-  //printf("Tick @ %.2f\n", wb_robot_get_time());
+  //printf("Tick @ %.2f\n", micros());
   // update sensor values
   for(int i = 0; i < GS_COUNT; ++i)
   {

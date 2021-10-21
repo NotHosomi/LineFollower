@@ -12,11 +12,7 @@ boolean led_state;
 
 
 
-void setLMotor(float pwm)
-{
-  digitalWrite( L_DIR_PIN, pwm < 0 ); // REV == HIGH == 1 == true, FWD == LOW == 0 == false
-  analogWrite( L_PWM_PIN, abs(pwm) );
-}
+
 
 // put your setup code here, to run once:
 void setup() {
@@ -44,8 +40,11 @@ void setup() {
 
 
 // put your main code here, to run repeatedly:
+unsigned int dT = 0; // delta time
+unsigned long pT = 0; // prev time
 void loop() {
-
+  dT = micros() - pT;
+  pT = micros()
   analogWrite( L_PWM_PIN, 20 );
   analogWrite( R_PWM_PIN, 20 );
 

@@ -20,7 +20,6 @@ private:
   };
   State state = LINE_NONE;
 
-  
   // state transitions
   void onLineMissing();
   void onLineLostTurn();
@@ -38,4 +37,6 @@ private:
   // utils
   void lineTurn();
   bool checkForLine();
+  
+  unsigned long t_mark; // timer
 };
