@@ -1,5 +1,16 @@
 //#include<stdlib.h>
 
+/*
+*
+*   PLEASE NOTE
+*   Obstacle avoidance is not implemented here,
+*   as this was a prototype for the 3pi+ implementation
+*
+*   KNOWN ISSUES:
+*   Struggles with 90* corners in the line
+*   
+*/
+
 #include <stdio.h>
 #include <webots/distance_sensor.h>
 #include <webots/position_sensor.h>
@@ -15,11 +26,13 @@
 #define GSL 0
 #define GSC 1
 #define GSR 2
-#define SPEED 1f
+#define SPEED 1.0f
+#define WHEEL_R 20.5 //mm
+#define AXEL_L 52 //mm
 WbDeviceTag gs[GS_COUNT]; /* ground sensors */
 unsigned short gsv[GS_COUNT] = {0, 0, 0};
 WbDeviceTag left_motor, right_motor;
-WbDeviceTag left_position_sensor, right_position_sensor;
+WbDeviceTag left_pos, right_pos;
 float t_mark; // timer
 
 enum State
@@ -32,6 +45,20 @@ enum State
   LINE_LOST_TRAVEL // returning to line
 };
 enum State state = LINE_NONE;
+
+struct Kinematics {
+  float pL;
+  float pR;
+  float dL;
+  float dR;
+  float x;
+  float y;
+  float th;
+};
+struct Kinematics pose;
+
+
+
 
 int checkForLine()
 {
@@ -230,8 +257,30 @@ void gotoState()
   }
 }
 
+void updatePose()
+{
+  float L = wb_position_sensor_get_value(left_pos);
+  float R = wb_position_sensor_get_value(right_pos);
+  pose.dL = L - pose.dL;
+  pose.dR = R - pose.dR;
+  pose.pL = L;
+  pose.pR = R;
+  
+  // wheel radius = 20.5
+  // axle length = 52
+  float dist = (WHEEL_R * L / 2) + (WHEEL_R * R / 2);
+  pose.x += dist * cos(pose.th);
+  pose.y += dist * sin(pose.th);
+  
+  pose.th += (WHEEL_R * L / AXEL_L) - (WHEEL_R * R / AXEL_L);
+  
+  printf("X: %f  Z: %f th:%f\n", pose.x + -0.191267 * 1000, pose.y + 0.276446 * 1000, pose.th*180/3.14159265359);
+}
+
+
 void update()
 {
+  updatePose();
   //printf("Tick @ %.2f\n", wb_robot_get_time());
   // update sensor values
   for(int i = 0; i < GS_COUNT; ++i)
@@ -240,37 +289,6 @@ void update()
   }
   //printf(" L: %d  C: %d  R: %d\n", gsv[0], gsv[1], gsv[2]);
   gotoState();
-  /*
-  if(gsv[GSL] >= GS_WHITE || gsv[GSR] >= GS_WHITE)
-  {
-    if(gsv[GSC] < GS_WHITE)
-    {
-      wb_motor_set_velocity(right_motor, SPEED);
-      wb_motor_set_velocity(left_motor, SPEED);
-    }
-    else
-    {
-      wb_motor_set_velocity(right_motor, SPEED);
-      wb_motor_set_velocity(left_motor, SPEED);
-    } 
-  }
-  else if(gsv[GSR] < gsv[GSL])
-  {
-    // turn right
-    wb_motor_set_velocity(right_motor, SPEED);
-    wb_motor_set_velocity(left_motor, 0);
-  }
-  else if(gsv[GSL] < gsv[GSR])
-  {
-    // turn left
-    wb_motor_set_velocity(left_motor, SPEED);
-    wb_motor_set_velocity(right_motor, 0);
-  }
-  else // no line
-  {
-    wb_motor_set_velocity(left_motor, SPEED);
-    wb_motor_set_velocity(right_motor, SPEED);
-  }*/
 }
 
 // UTIL
@@ -310,11 +328,20 @@ int main(void)
   wb_motor_set_velocity(left_motor, SPEED);
   wb_motor_set_velocity(right_motor, SPEED);
   
-  // get a handler to the position sensors and enable them.
-  left_position_sensor = wb_robot_get_device("left wheel sensor");
-  right_position_sensor = wb_robot_get_device("right wheel sensor");
-  wb_position_sensor_enable(left_position_sensor, TIME_STEP);
-  wb_position_sensor_enable(right_position_sensor, TIME_STEP);
+  // wheels
+  left_pos = wb_robot_get_device("left wheel sensor");
+  right_pos = wb_robot_get_device("right wheel sensor");
+  wb_position_sensor_enable(left_pos, TIME_STEP);
+  wb_position_sensor_enable(right_pos, TIME_STEP);
+  
+  pose.pL = wb_position_sensor_get_value(left_pos);
+  pose.pR = wb_position_sensor_get_value(right_pos);
+  pose.dL = 0;
+  pose.dR = 0;
+  
+  pose.x = 0;  // kinematic frame based on start pos
+  pose.y = 0;
+  pose.th = 0;
   
   while (wb_robot_step(TIME_STEP) != -1)
   {
