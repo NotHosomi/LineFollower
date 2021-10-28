@@ -1,7 +1,9 @@
 #include "FSM.h"
 #include "motors.h"
 #include "linesensor.h"
+#include <Arduino.h>
 
+/*
 FSM::FSM()
 {
   if(instance)
@@ -13,16 +15,35 @@ FSM::FSM()
 FSM::~FSM()
 {
   instance = nullptr;
-}
+}*/
 
-// returns true if any sensors are below the threshold
-bool FSM::checkForLine() 
+
+FSM* FSM::instance = nullptr;
+
+/*--------------------
+       INTERFACE
+----------------------*/
+static bool FSM::gotoState()
 {
-  if(gsv[GSL] <= GS_WHITE ||
-     gsv[GSC] <= GS_WHITE ||
-     gsv[GSR] <= GS_WHITE)
-  {
+  if(instance == nullptr)
     return true;
+  //printf("Tick @ %.2f\n", micros());
+  // update sensor values
+  LineSensors::refresh(FSM::instance->gsv);
+  switch(instance->state)
+  {
+  case State::LINE_NONE: instance->lineNone();
+    break;
+  case State::LINE_JOIN: instance->lineJoin();
+    break;
+  case State::LINE_FOLLOW: instance->lineFollow();
+    break;
+  case State::LINE_MISSING: instance->lineMissing();
+    break;
+  case State::LINE_LOST_TURN: instance->lineLostTurn();
+    break;
+  case State::LINE_LOST_TRAVEL: instance->lineLostTravel();
+    break;
   }
   return false;
 }
@@ -33,7 +54,7 @@ bool FSM::checkForLine()
 #define BACKTRACK_THRESH 2000000 // 2 secs
 void FSM::onLineMissing()
 {
-  //printf("State: LINE_MISSING\n");
+  //Serial.println("State: LINE_MISSING\n");
   state = LINE_MISSING;
   t_mark = micros();
 
@@ -57,7 +78,7 @@ void FSM::lineMissing()
 #define LLTURN_THRESH 500000 // 0.5 secs
 void FSM::onLineLostTurn()
 {
-  //printf("State: LINE_LOST_TURN\n");
+  //Serial.println("State: LINE_LOST_TURN\n");
   t_mark = micros();
   Motors::setRMotor(SPEED);
   Motors::setLMotor(-SPEED);
@@ -70,7 +91,7 @@ void FSM::lineLostTurn()
 }
 void FSM::onLineLostTravel()
 {
-  //printf("State: LINE_LOST_TRAVEL\n");
+  //Serial.println("State: LINE_LOST_TRAVEL\n");
   state = LINE_LOST_TRAVEL;
   Motors::setRMotor(SPEED);
   Motors::setLMotor(SPEED);
@@ -99,7 +120,7 @@ void FSM::lineNone()
 }
 void FSM::onLineJoin()
 {
-  //printf("State: LINE_JOIN\n");
+  //Serial.println("State: LINE_JOIN\n");
   state = LINE_JOIN;
   t_mark = micros();
 }
@@ -117,12 +138,13 @@ void FSM::lineJoin()
 ----------------------*/
 void FSM::onLineFollow()
 {
-  //printf("State: LINE_FOLLOW\n");
+  //Serial.println("State: LINE_FOLLOW\n");
   state = LINE_FOLLOW;
 }
 
 void FSM::lineFollow()
 {
+  float err = calcErr();
   if(gsv[GSL] <= GS_BLACK &&
      gsv[GSC] <= GS_BLACK &&
      gsv[GSR] <= GS_BLACK)
@@ -171,29 +193,22 @@ void FSM::lineTurn()
 }
 
 
-
 /*--------------------
-     NON-SPECIFIC
+         UTILS
 ----------------------*/
-static void FSM::gotoState()
+// returns true if any sensors are below the threshold
+bool FSM::checkForLine() 
 {
-  //printf("Tick @ %.2f\n", micros());
-  // update sensor values
-  LineSensors::refresh(&gsv[0]);
-  //printf(" LL: %d  L: %d  C: %d  R: %d  R: %d\n", gsv[0], gsv[1], gsv[2], gsv[3], gsv[4]);
-  switch(state)
+  if(gsv[GSL] <= GS_WHITE ||
+     gsv[GSC] <= GS_WHITE ||
+     gsv[GSR] <= GS_WHITE)
   {
-  case State::LINE_NONE: instance->lineNone();
-    break;
-  case State::LINE_JOIN: instance->lineJoin();
-    break;
-  case State::LINE_FOLLOW: instance->lineFollow();
-    break;
-  case State::LINE_MISSING: instance->lineMissing();
-    break;
-  case State::LINE_LOST_TURN: instance->lineLostTurn();
-    break;
-  case State::LINE_LOST_TRAVEL: instance->lineLostTravel();
-    break;
+    return true;
   }
+  return false;
+}
+
+float FSM::calcErr()
+{
+  return (gsv[GSL] + (gsv[GSC] * 0.5f)) - (gsv[GSR] + (gsv[GSC]*0.5f)); 
 }

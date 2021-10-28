@@ -1,6 +1,6 @@
 #pragma once
 
-#define SERIAL true
+#define SERIAL_PLOT true
 
 // Pins
 #define R_PWM_PIN 9 // A9
@@ -8,7 +8,8 @@
 #define R_DIR_PIN 15
 #define L_DIR_PIN 16
 
-#define LS_PIN_LL 12 //A11
+#define LS_COUNT 5
+#define LS_PIN_LL 12 //A11 //29
 #define LS_PIN_L 18 // A0
 #define LS_PIN_C 20 // A2
 #define LS_PIN_R 21 // A3
@@ -22,8 +23,8 @@
 // Magic Numbers
 #define SPEED 20
 #define GS_COUNT 5
-#define GS_WHITE 830  // TODO: make dynamic
-#define GS_BLACK 305
+#define GS_WHITE -780  // TODO: make dynamic
+#define GS_BLACK -1000
 #define GSLL 0
 #define GSL  1
 #define GSC  2

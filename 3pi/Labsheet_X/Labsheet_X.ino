@@ -41,15 +41,26 @@ void setup() {
   led_state = false;
 }
 
+int gsv[5] = { 0, 0, 0, 0, 0};
 
 // put your main code here, to run repeatedly:
 unsigned int dT = 0; // delta time
 unsigned long pT = 0; // prev time
+char buffer[100] = "";
 void loop() {
   dT = micros() - pT;
   pT = micros();
+  
+  LineSensors::refresh(gsv);
   fsm.gotoState();
+
+  
+#if SERIAL_PLOT
+  // TODO get serial working outside of .ino
+  //sprintf(buffer, " LL: %d  L: %d  C: %d  R: %d  RR: %d", gsv[0], gsv[1], gsv[2], gsv[3], gsv[4]);
+  sprintf(buffer, "%d %d %d %d %d\nLL L C R RR", gsv[0], gsv[1], gsv[2], gsv[3], gsv[4]);
+  Serial.println(buffer);
+#endif
   // Odomentry(dT);
-  Serial.println("Loop");
-  delay(5);
+  delay(50);
 }

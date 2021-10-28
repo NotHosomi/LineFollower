@@ -5,15 +5,22 @@ class FSM {
 private:
 
 public:
-  FSM();
-  ~FSM();
-  static void gotoState();
+  FSM()
+  {
+    FSM::instance = this;
+  }
+  //~FSM();
+  static bool gotoState();
+
+  // TODO: get Serial working outside of .ino
+  static FSM* instance;
+  int gsv[5] = {0, 0, 0, 0, 0};
   
 private:
-  static FSM* instance;
   
   enum State
   {
+    //PREP,
     LINE_NONE,       // proceed until line found
     LINE_JOIN,       // first hit line
     LINE_FOLLOW,     // we have a line
@@ -40,8 +47,8 @@ private:
   // utils
   void lineTurn();
   bool checkForLine();
+  float calcErr();
   
   unsigned long t_mark; // timer
 
-  int gsv[5] = {0, 0, 0, 0, 0};
 };
