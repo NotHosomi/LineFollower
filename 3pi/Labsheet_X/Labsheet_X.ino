@@ -2,17 +2,14 @@
 #include "FSM.h"
 #include "motors.h"
 #include "linesensor.h"
-//#include "encoders.h"
-//#include "kinematics.h"
+#include "kinematics.h"
 //#include "pid.h"
 
-#define LED_PIN 13
 boolean led_state;
-
-FSM fsm;
-
+Kinematics_c odometry;
 
 
+float t = 0;
 
 // put your setup code here, to run once:
 void setup() {
@@ -22,7 +19,14 @@ void setup() {
   Serial.println("***RESET***");
 
   // Set LED pin as an output
-  pinMode( LED_PIN, OUTPUT );
+  pinMode( LED_PIN_Y, OUTPUT );
+  pinMode( LED_PIN_G, OUTPUT );
+  pinMode( LED_PIN_R, OUTPUT );
+  pinMode( PIN_BUZZ, OUTPUT );
+  digitalWrite(LED_PIN_Y, LOW);
+  digitalWrite(LED_PIN_G, LOW);
+  digitalWrite(LED_PIN_R, LOW);
+  digitalWrite(PIN_BUZZ, LOW);
   /*pinMode( L_PWM_PIN, OUTPUT );
   pinMode( R_PWM_PIN, OUTPUT );
   pinMode( R_DIR_PIN, OUTPUT );
@@ -35,32 +39,45 @@ void setup() {
   analogWrite( R_PWM_PIN, 20 );*/
   Motors::init();
   LineSensors::init();
+  odometry = Kinematics_c();
   new FSM();
 
   // Set initial state of the LED
   led_state = false;
+
+  
+  Motors::setRMotor(0);
+  Motors::setLMotor(0);
+  delay(5000);
+  Motors::setLMotor(SPEED);
+  Motors::setRMotor(SPEED);
+  t = micros();
 }
 
-int gsv[5] = { 0, 0, 0, 0, 0};
+double gsv[5] = { 0, 0, 0, 0, 0};
 
 // put your main code here, to run repeatedly:
 unsigned int dT = 0; // delta time
 unsigned long pT = 0; // prev time
 char buffer[100] = "";
 void loop() {
-  dT = micros() - pT;
-  pT = micros();
+  //dT = micros() - pT;
+  //pT = micros();
   
+  //digitalWrite(LED_PIN_Y, LOW);
+  //digitalWrite(LED_PIN_G, LOW);
+  //digitalWrite(LED_PIN_R, LOW);
+  //digitalWrite(PIN_BUZZ, LOW);
   LineSensors::refresh(gsv);
-  fsm.gotoState();
+  FSM::gotoState();
+  odometry.update();
 
+  // odometry test
+  //if(micros() - t > 3100000)
+  //{
+  //  Motors::setRMotor(0);
+  //  Motors::setLMotor(0);
+  //}
   
-#if SERIAL_PLOT
-  // TODO get serial working outside of .ino
-  //sprintf(buffer, " LL: %d  L: %d  C: %d  R: %d  RR: %d", gsv[0], gsv[1], gsv[2], gsv[3], gsv[4]);
-  sprintf(buffer, "%d %d %d %d %d\nLL L C R RR", gsv[0], gsv[1], gsv[2], gsv[3], gsv[4]);
-  Serial.println(buffer);
-#endif
-  // Odomentry(dT);
-  delay(50);
+  delay(32);
 }

@@ -18,17 +18,25 @@ class Motors {
     digitalWrite(R_DIR_PIN, FWD);
     digitalWrite(L_DIR_PIN, FWD);
   
-    analogWrite(L_PWM_PIN, 0);
-    analogWrite(R_PWM_PIN, 0);
+    analogWrite(L_PWM_PIN, 20);
+    analogWrite(R_PWM_PIN, 20);
   }
 
   static void setLMotor(float pwm)
   {
+    #if DEBUG_MOTORS
+    Serial.print("L Motor ");
+    Serial.println(pwm);
+    #endif
     digitalWrite(L_DIR_PIN, pwm < 0); // REV == HIGH == 1 == true, FWD == LOW == 0 == false
     analogWrite(L_PWM_PIN, abs(pwm));
   }
   static void setRMotor(float pwm)
   {
+    #if DEBUG_MOTORS
+    Serial.print("R Motor ");
+    Serial.println(pwm);
+    #endif
     digitalWrite(R_DIR_PIN, pwm < 0); // REV == HIGH == 1 == true, FWD == LOW == 0 == false
     analogWrite(R_PWM_PIN, abs(pwm));
   }

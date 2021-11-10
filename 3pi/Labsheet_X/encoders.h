@@ -7,9 +7,9 @@
 
 
 // Volatile Global variables used by Encoder ISR.
-volatile long count_e0; // used by encoder to count the rotation
+volatile long count_eR; // used by encoder to count the rotation
 volatile byte state_e0;
-volatile long count_e1;
+volatile long count_eL;
 volatile byte state_e1;
 
 
@@ -18,54 +18,37 @@ volatile byte state_e1;
 // ISR to read the Encoder1 Channel A and B pins
 // and then look up based on  transition what kind of
 // rotation must have occured.
-ISR( INT6_vect ) {
-  // We know that the ISR is only called when a pin changes.
-  // We also know only 1 pin can change at a time.
-  // The XOR(AB) signal change from "Channel A" triggers ISR.
- 
-  // First, Read in the new state of the encoder pins.
-  // Standard pins, so standard read functions.
+ISR( INT6_vect ) { // right
   boolean e0_B = digitalRead( ENCODER_0_B_PIN ); // normal B state
   boolean e0_A = digitalRead( ENCODER_0_A_PIN ); // XOR(AB)
  
-  // Software XOR (^) logically infers
-  // the true value of A given the state of B
   e0_A = e0_A ^ e0_B;
 
-  // Shift our (new) current readings into bit positions
-  // 2 and 3 in the state variable (current state)
+  state_e0 = state_e0 >> 2;
+    
   // State: (bit3)  (bit2)  (bit1)   (bit0)
   // State:  new B   new A   old B   old A
-    state_e0 = state_e0 | ( e0_B  << 3 );
-    state_e0 = state_e0 | ( e0_A  << 2 );
+  state_e0 = state_e0 | ( e0_B  << 3 );
+  state_e0 = state_e0 | ( e0_A  << 2 );
 
-    // Handle which transition we have registered.
-    // Complete this if statement as necessary.
-    // Refer to the labsheet. 
-    if( state_e0 == 0 ) {
+  // if any invalid combination, return early.
+  // if !((At XOR At-1) XOR (Bt XOR Bt-1)) then return
+  if(!((state_e0 >> 2 & 1 ^ state_e0 & 1) ^
+    (state_e0 >> 3 & 1 ^ state_e0 >> 1 & 1)))
+    return;
 
-    } else if( state_e0 == 1 ) {
+  //By excluding the invalid combinations, this much simpler if/else can be used
+  // if Bt XOR At-1 then +1 else -1
+  count_eL += (state_e0 >> 3 & 1 ^ state_e0 & 1) ? -1 : 1;
 
-    } else if( state_e0 == 2 ) {
+  // had to check cpp bitwise operator precedence a lot, lol
+  // precedence goes << and >>, &, ^, |
+  // so need very few brackets thankfully 
 
-    } // Continue this if statement as necessary.
-
-    // Shift the current readings (bits 3 and 2) down
-    // into position 1 and 0 (to become prior readings)
-    // This bumps bits 1 and 0 off to the right, "deleting"
-    // them for the next ISR call. 
-    state_e0 = state_e0 >> 2;
 
 }
 
-
-// This ISR handles just Encoder 0
-// ISR to read the Encoder0 Channel A and B pins
-// and then look up based on  transition what kind of
-// rotation must have occured.
-
-
-ISR( PCINT0_vect ) {
+ISR( PCINT0_vect ) { // left
  
     // First, Read in the new state of the encoder pins.
 
@@ -85,33 +68,25 @@ ISR( PCINT0_vect ) {
 
     e1_A = e1_A ^ e1_B;
 
-    // Create a bitwise representation of our states
-    // We do this by shifting the boolean value up by
-    // the appropriate number of bits, as per our table
-    // header:
-    //
-    // State :  (bit3)  (bit2)  (bit1)  (bit0)
-    // State :  New A,  New B,  Old A,  Old B.
-    state_e1 = state_e1 | ( e1_B  << 3 );
-    state_e1 = state_e1 | ( e1_A  << 2 );
 
+  state_e1 = state_e1 >> 2;
+    
+  // Shift our (new) current readings into bit positions
+  // 2 and 3 in the state variable (current state)
+  // State: (bit3)  (bit2)  (bit1)   (bit0)
+  // State:  new B   new A   old B   old A
+  state_e1 = state_e1 | ( e1_B  << 3 );
+  state_e1 = state_e1 | ( e1_A  << 2 );
 
-    // Handle which transition we have registered.
-    // Complete this if statement as necessary.
-    // Refer to the labsheet. 
-    if( state_e1 == 0 ) {
+  // if any invalid combination, return early.
+  // if !((At XOR At-1) XOR (Bt XOR Bt-1)) then return
+  if(!((state_e1 >> 2 & 1 ^ state_e1 & 1) ^
+    (state_e1 >> 3 & 1 ^ state_e1 >> 1 & 1)))
+    return;
 
-    } else if( state_e1 == 1 ) {
-
-    } else if( state_e1 == 2 ) {
-
-    } // Continue this if statement as necessary.
-
-    // Shift the current readings (bits 3 and 2) down
-    // into position 1 and 0 (to become prior readings)
-    // This bumps bits 1 and 0 off to the right, "deleting"
-    // them for the next ISR call. 
-    state_e1 = state_e1 >> 2;
+  //By excluding the invalid combinations, this much simpler if/else can be used
+  // if Bt XOR At-1 then +1 else -1
+  count_eL += (state_e1 >> 3 & 1 ^ state_e1 & 1) ? -1 : 1;
 }
 
 
@@ -124,7 +99,7 @@ ISR( PCINT0_vect ) {
 */
 void setupEncoder0() 
 {
-    count_e0 = 0;
+    count_eR = 0;
 
     // Setup pins for right encoder 
     pinMode( ENCODER_0_A_PIN, INPUT );
@@ -176,7 +151,7 @@ void setupEncoder0()
 void setupEncoder1() 
 {
 
-    count_e1 = 0;
+    count_eL = 0;
 
     // Setting up left encoder:
     // The Romi board uses the pin PE2 (port E, pin 2) which is

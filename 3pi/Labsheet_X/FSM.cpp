@@ -3,21 +3,6 @@
 #include "linesensor.h"
 #include <Arduino.h>
 
-/*
-FSM::FSM()
-{
-  if(instance)
-    delete this;
-  else
-    instance = this;
-}
-
-FSM::~FSM()
-{
-  instance = nullptr;
-}*/
-
-
 FSM* FSM::instance = nullptr;
 
 /*--------------------
@@ -27,7 +12,6 @@ static bool FSM::gotoState()
 {
   if(instance == nullptr)
     return true;
-  //printf("Tick @ %.2f\n", micros());
   // update sensor values
   LineSensors::refresh(FSM::instance->gsv);
   switch(instance->state)
@@ -45,16 +29,23 @@ static bool FSM::gotoState()
   case State::LINE_LOST_TRAVEL: instance->lineLostTravel();
     break;
   }
+  #if DEBUG_FSM_C
+  Serial.println(instance->state);
+  #endif
   return false;
 }
 
 /*--------------------
      LINE MISSING
 ----------------------*/
-#define BACKTRACK_THRESH 2000000 // 2 secs
+#define BACKTRACK_THRESH 2000000 // 1 secs
 void FSM::onLineMissing()
 {
-  //Serial.println("State: LINE_MISSING\n");
+  #if DEBUG_FSM
+  Serial.println("State: LINE_MISSING\n");
+  //digitalWrite(LED_PIN_R, HIGH);
+  #endif
+  
   state = LINE_MISSING;
   t_mark = micros();
 
@@ -68,17 +59,39 @@ void FSM::lineMissing()
     onLineFollow();
     return;
   }
+  if(gsv[GSRR] < -0.5)
+  {
+    onLineJoin(true);
+    return;
+  }
+  if(gsv[GSLL] < -0.5)
+  {
+    onLineJoin(false);
+    return;
+  }
   if(micros() - t_mark > BACKTRACK_THRESH)
-    onLineLostTurn();
+    if(millis() < GAMEOVER_THRESHOLD) // A shoddy way of distinguishing between line end and line start
+      onLineLostTurn();
+    else
+    {
+      Motors::setRMotor(0);
+      Motors::setLMotor(0);
+      delay(10000);
+    }
 }
 
 /*--------------------
        LINE LOST
 ----------------------*/
-#define LLTURN_THRESH 500000 // 0.5 secs
+#define LLTURN_THRESH 1600000 // 1.6 secs
 void FSM::onLineLostTurn()
 {
-  //Serial.println("State: LINE_LOST_TURN\n");
+  #if DEBUG_FSM
+  Serial.println("State: LINE_LOST_TURN\n");
+  //digitalWrite(LED_PIN_R, HIGH);
+  #endif
+  
+  state = LINE_LOST_TURN;
   t_mark = micros();
   Motors::setRMotor(SPEED);
   Motors::setLMotor(-SPEED);
@@ -91,7 +104,10 @@ void FSM::lineLostTurn()
 }
 void FSM::onLineLostTravel()
 {
-  //Serial.println("State: LINE_LOST_TRAVEL\n");
+  #if DEBUG_FSM
+  Serial.println("State: LINE_LOST_TRAVEL\n");
+  #endif
+  
   state = LINE_LOST_TRAVEL;
   Motors::setRMotor(SPEED);
   Motors::setLMotor(SPEED);
@@ -109,20 +125,40 @@ void FSM::lineLostTravel()
 /*--------------------
      LINE JOINING
 ----------------------*/
-#define JOIN_TURN_TIME 3000000 // 3 secs
+#define JOIN_TURN_TIME 431000 // 0.431 secs (50 deg turn)
 void FSM::lineNone()
 {
-  if(checkForLine())
+  if(gsv[GSRR] < -0.5)
   {
-    onLineJoin();
+    onLineJoin(true);
+    return;
+  }
+  else if(gsv[GSLL] < -0.5)
+  {
+    onLineJoin(false);
     return;
   }
 }
-void FSM::onLineJoin()
+void FSM::onLineJoin(bool go_right)
 {
-  //Serial.println("State: LINE_JOIN\n");
+  #if DEBUG_FSM
+  Serial.println("State: LINE_JOIN\n");
+  //digitalWrite(LED_PIN_G, HIGH);
+  //digitalWrite(LED_PIN_Y, HIGH);
+  #endif
+  
   state = LINE_JOIN;
   t_mark = micros();
+  if(go_right)
+  {
+    Motors::setLMotor(SPEED);
+    Motors::setRMotor(-SPEED);
+  }
+  else
+  {
+    Motors::setLMotor(SPEED);
+    Motors::setRMotor(-SPEED);
+  }
 }
 void FSM::lineJoin()
 {
@@ -138,40 +174,45 @@ void FSM::lineJoin()
 ----------------------*/
 void FSM::onLineFollow()
 {
-  //Serial.println("State: LINE_FOLLOW\n");
+  #if DEBUG_FSM
+  Serial.println("State: LINE_FOLLOW\n");
+  //digitalWrite(LED_PIN_Y, HIGH);
+  #endif
   state = LINE_FOLLOW;
 }
 
 void FSM::lineFollow()
 {
-  float err = calcErr();
-  if(gsv[GSL] <= GS_BLACK &&
-     gsv[GSC] <= GS_BLACK &&
-     gsv[GSR] <= GS_BLACK)
+  if(gsv[GSL] <= -1 &&
+     gsv[GSC] <= -1 &&
+     gsv[GSR] <= -1)
   {
     // all sensors inside the line
     // continue what we were doing last, until a sensor exits the line
     // ??or should be just turn until we see light??
-    //printf("Engulfed\n");
-  Motors::setRMotor(-SPEED);
-  Motors::setLMotor(SPEED);
-    return;
+    
+    #if DEBUG_FSM
+    Serial.println("Engulfed\n");
+    #endif
+    //Motors::setRMotor(-SPEED);
+    //Motors::setLMotor(SPEED);
+    //return;
   }
   
-  if(gsv[GSL] >= GS_WHITE &&
-     gsv[GSC] >= GS_WHITE &&
-     gsv[GSR] >= GS_WHITE) // what about just if(!checkForLine())
+  if(gsv[GSL] >= -0.2 &&
+     gsv[GSC] >= -0.2 &&
+     gsv[GSR] >= -0.2) // what about just if(!checkForLine())
   {
     onLineMissing();
     return;
   }
   
-  if(gsv[GSL] <= GS_WHITE ||
-     gsv[GSR] <= GS_WHITE)
+  if(gsv[GSL] < 0 ||
+     gsv[GSR] < 0)
   {
     lineTurn();
   }
-  else if (gsv[GSC] <= GS_WHITE)
+  else if (gsv[GSC] < 0)
   {
     Motors::setRMotor(SPEED);
     Motors::setLMotor(SPEED);
@@ -180,16 +221,23 @@ void FSM::lineFollow()
 
 void FSM::lineTurn()
 {
-    int LR_delta = gsv[GSL] - gsv[GSR];
-    int inverted = gsv[GSL] < gsv[GSR];
-    if(inverted)
-      LR_delta *= -1;
-    float ratio = (GS_WHITE - LR_delta) / GS_WHITE;
-    
-    // use BinaryCrossEntropy-like blend
-    
-    Motors::setRMotor(SPEED * (inverted*(1-ratio) + (1-inverted)*ratio));
-    Motors::setLMotor(SPEED * (inverted*ratio + (1-inverted)*(1-ratio)));
+#if LINETURN_ALPHA
+  int LR_delta = gsv[GSL] - gsv[GSR];
+  bool inverted = gsv[GSL] < gsv[GSR];
+  if(inverted)
+    LR_delta *= -1;
+  float ratio = LR_delta;
+  
+  // use BinaryCrossEntropy-like blend
+  
+  Motors::setRMotor(SPEED * (inverted*(1-ratio) + (1-inverted)*ratio));
+  Motors::setLMotor(SPEED * (inverted*ratio + (1-inverted)*(1-ratio)));
+#else
+  float e = (gsv[GSL] + 0.5f * gsv[GSC]) - (gsv[GSR] + 0.5f * gsv[GSC]);
+  e /= 3;
+  Motors::setRMotor(SPEED * (1+TURN_AGGRESSION*e));
+  Motors::setLMotor(SPEED * (1+TURN_AGGRESSION*e));
+#endif
 }
 
 
@@ -199,16 +247,11 @@ void FSM::lineTurn()
 // returns true if any sensors are below the threshold
 bool FSM::checkForLine() 
 {
-  if(gsv[GSL] <= GS_WHITE ||
-     gsv[GSC] <= GS_WHITE ||
-     gsv[GSR] <= GS_WHITE)
+  if(gsv[GSL] < -0.2 ||
+     gsv[GSC] < -0.2 ||
+     gsv[GSR] < -0.2)
   {
     return true;
   }
   return false;
-}
-
-float FSM::calcErr()
-{
-  return (gsv[GSL] + (gsv[GSC] * 0.5f)) - (gsv[GSR] + (gsv[GSC]*0.5f)); 
 }

@@ -1,4 +1,6 @@
 #pragma once
+#include "defines.h"
+#include <Arduino.h>
 
 
 class FSM {
@@ -14,7 +16,7 @@ public:
 
   // TODO: get Serial working outside of .ino
   static FSM* instance;
-  int gsv[5] = {0, 0, 0, 0, 0};
+  double gsv[5] = {0, 0, 0, 0, 0};
   
 private:
   
@@ -35,7 +37,7 @@ private:
   void onLineLostTurn();
   void onLineLostTravel();
   void onLineFollow();
-  void onLineJoin();
+  void onLineJoin(bool go_right);
   // state processing
   void lineMissing();
   void lineLostTurn();
