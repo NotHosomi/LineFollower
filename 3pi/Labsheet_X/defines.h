@@ -2,11 +2,11 @@
 #include <Arduino.h>
 
 #define DEBUG_GROUND false
-#define DEBUG_FSM    true
+#define DEBUG_FSM    false
 #define DEBUG_FSM_C  false
 #define DEBUG_MOTORS false
 #define DEBUG_ENCODE false
-#define DEBUG_ODO    false
+#define DEBUG_ODO    true
 
 #define LINETURN_ALPHA true
 #define TURN_AGGRESSION 0.5

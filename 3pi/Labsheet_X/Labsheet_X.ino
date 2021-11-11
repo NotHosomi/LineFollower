@@ -49,8 +49,8 @@ void setup() {
   Motors::setRMotor(0);
   Motors::setLMotor(0);
   delay(5000);
-  Motors::setLMotor(SPEED);
-  Motors::setRMotor(SPEED);
+  //Motors::setLMotor(SPEED);
+  //Motors::setRMotor(SPEED);
   t = micros();
 }
 
@@ -63,17 +63,12 @@ char buffer[100] = "";
 void loop() {
   //dT = micros() - pT;
   //pT = micros();
-  
-  //digitalWrite(LED_PIN_Y, LOW);
-  //digitalWrite(LED_PIN_G, LOW);
-  //digitalWrite(LED_PIN_R, LOW);
-  //digitalWrite(PIN_BUZZ, LOW);
   LineSensors::refresh(gsv);
-  FSM::gotoState();
+  //FSM::gotoState();
   odometry.update();
 
   // odometry test
-  //if(micros() - t > 3100000)
+  //if(micros() - t > 3000000)
   //{
   //  Motors::setRMotor(0);
   //  Motors::setLMotor(0);

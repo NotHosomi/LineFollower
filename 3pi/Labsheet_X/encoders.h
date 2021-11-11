@@ -39,7 +39,7 @@ ISR( INT6_vect ) { // right
 
   //By excluding the invalid combinations, this much simpler if/else can be used
   // if Bt XOR At-1 then +1 else -1
-  count_eL += (state_e0 >> 3 & 1 ^ state_e0 & 1) ? -1 : 1;
+  count_eR += (state_e0 >> 3 & 1 ^ state_e0 & 1) ? -1 : 1;
 
   // had to check cpp bitwise operator precedence a lot, lol
   // precedence goes << and >>, &, ^, |

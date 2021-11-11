@@ -4,13 +4,13 @@
 
 #define WHEEL_RAD 16 //mm
 #define AXEL_LEN 86  //mm
-#define WHEEL_CIRC 2 * WHEEL_RAD * PI // mm
+#define WHEEL_CIRC (2 * WHEEL_RAD * PI) // mm
 
 // 3pi+ info
 // gear ratio: 29.86:1
 // encoder counts per shaft rotation: 12
 #define CPR 358.32
-#define COUNT2MM (WHEEL_CIRC/CPR); // THIS IS WRONG!!!
+#define COUNT2MM (WHEEL_CIRC/CPR);
 #define RAD2DEG (180.0/PI)
 #define THETA_FIX 2 * PI / 0.56 // 1 full rotation gives 0.56 as the theta angle, so this should correct that, hopefully
 
@@ -33,6 +33,8 @@ public:
 
   // Use this function to update
   // your kinematics
+  double netL = 0;
+  double netR = 0;
   void update()
   {
     #if DEBUG_ENCODE
@@ -43,17 +45,19 @@ public:
     #endif
     double L = (double)count_eL;
     double R = (double)count_eR;
+    netL += L * COUNT2MM;
+    netR += R * COUNT2MM;
     count_eL = 0;
     count_eR = 0;
 
-    L *= WHEEL_RAD / CPR;
-    R *= WHEEL_RAD / CPR;
+    L *= COUNT2MM;
+    R *= COUNT2MM;
     
     double dist = (L / 2) + (R / 2);
     x += dist * cos(rot);
     y += dist * sin(rot);
   
-    rot += ((L / AXEL_LEN) - (R / AXEL_LEN)) * THETA_FIX;
+    rot += ((L / AXEL_LEN) - (R / AXEL_LEN));
 
     #if DEBUG_ODO
     //char buffer[50];
@@ -65,9 +69,9 @@ public:
     Serial.print(" Y ");
     Serial.print(rot);
     Serial.print(" Th ");
-    Serial.print(L);
+    Serial.print(netL);
     Serial.print(" L ");
-    Serial.print(R);
+    Serial.print(netR);
     Serial.println(" R ");
     #endif
   }
