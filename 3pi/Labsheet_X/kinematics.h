@@ -33,8 +33,8 @@ public:
 
   // Use this function to update
   // your kinematics
-  double netL = 0;
-  double netR = 0;
+  //double netL = 0;
+  //double netR = 0;
   void update()
   {
     #if DEBUG_ENCODE
@@ -45,8 +45,8 @@ public:
     #endif
     double L = (double)count_eL;
     double R = (double)count_eR;
-    netL += L * COUNT2MM;
-    netR += R * COUNT2MM;
+    //netL += L * COUNT2MM;
+    //netR += R * COUNT2MM;
     count_eL = 0;
     count_eR = 0;
 
@@ -60,9 +60,6 @@ public:
     rot += ((L / AXEL_LEN) - (R / AXEL_LEN));
 
     #if DEBUG_ODO
-    //char buffer[50];
-    //sprintf(buffer, "X: %8.4f\tY: %8.4f", x, y);
-    //Serial.println(buffer);
     Serial.print(x);
     Serial.print(" X ");
     Serial.print(y);
@@ -73,6 +70,13 @@ public:
     Serial.print(" L ");
     Serial.print(netR);
     Serial.println(" R ");
+    #endif
+    #if PRINT_ODO
+    Serial.print(x);
+    Serial.print(" ");
+    Serial.print(y);
+    Serial.print(" ");
+    Serial.println(rot);
     #endif
   }
 
