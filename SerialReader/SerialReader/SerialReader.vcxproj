@@ -147,12 +147,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Decoder.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="EMG_examp.cpp" />
     <ClCompile Include="Serial.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bitmap_format.h" />
+    <ClInclude Include="Decoder.h" />
     <ClInclude Include="Serial.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
