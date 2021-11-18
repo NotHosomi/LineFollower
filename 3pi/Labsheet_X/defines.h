@@ -1,12 +1,18 @@
 #pragma once
 #include <Arduino.h>
 
+// DEBUG print modes
 #define DEBUG_GROUND false
 #define DEBUG_FSM    false
 #define DEBUG_FSM_C  false
 #define DEBUG_MOTORS false
 #define DEBUG_ENCODE false
-#define DEBUG_ODO    true
+#define DEBUG_ODO    false
+
+// Mapping types
+#define MAPPING_GRID true
+#define MAPPING_POINTS false
+#define MAPPING_CHAIN false
 
 #define LINETURN_ALPHA true
 #define TURN_AGGRESSION 0.5

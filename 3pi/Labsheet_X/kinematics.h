@@ -66,17 +66,10 @@ public:
     Serial.print(" Y ");
     Serial.print(rot);
     Serial.print(" Th ");
-    Serial.print(netL);
-    Serial.print(" L ");
-    Serial.print(netR);
-    Serial.println(" R ");
-    #endif
-    #if PRINT_ODO
-    Serial.print(x);
-    Serial.print(" ");
-    Serial.print(y);
-    Serial.print(" ");
-    Serial.println(rot);
+    //Serial.print(netL);
+    //Serial.print(" L ");
+    //Serial.print(netR);
+    //Serial.println(" R ");
     #endif
   }
 

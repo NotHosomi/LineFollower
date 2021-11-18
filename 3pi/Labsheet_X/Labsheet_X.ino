@@ -4,9 +4,11 @@
 #include "linesensor.h"
 #include "kinematics.h"
 //#include "pid.h"
+#include "Grid.h"
 
 boolean led_state;
 Kinematics_c odometry;
+Grid grid;
 
 
 float t = 0;

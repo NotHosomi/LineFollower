@@ -1,4 +1,6 @@
 #include "Grid.h"
+#include "defines.h"
+#if MAPPING_GRID
 
 #define OFFSET_X G_WIDTH/2
 #define OFFSET_Y G_HEIGHT/10
@@ -10,7 +12,7 @@ Grid::Grid()
   //{
   //  *p = 0;
   //}
-  for(int i = 0; i < SIZE; ++i)
+  for(int i = 0; i < BYTES; ++i)
   {
     tiles[i] = 0;
   }
@@ -18,9 +20,9 @@ Grid::Grid()
 
 Grid::~Grid()
 {
-  for(int i = 0; i < G_HEIGHT * G_WIDTH/8; ++i;)
+  for(int i = 0; i < BYTES; ++i)
   {
-    tiles = 0;
+    tiles[i] = 0;
   }
 }
 
@@ -38,3 +40,4 @@ void Grid::setTile(int x, int y)
   // 128U is b00000000'00000000'00000000'00000000'10000000
   tiles[index] |= 128U >> bindex;
 }
+#endif
