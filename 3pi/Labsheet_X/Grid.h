@@ -18,14 +18,23 @@
 #define G_WIDTH 80 // should be divisible by 8
 #define BYTES G_HEIGHT * G_WIDTH/8
 
+//tape line width is 18mm
+// nyquist-theorum, if the tiles are half of size of the line, they should be accurate enough, perhaps?
+#define G_SCALE 9 //mm
+
+// note, ground sensors are 44mm from center
+// side 12 deg
+// far side 46 deg
 
 class Grid
 {
 public:
+  static Grid* instance;
   Grid();
   ~Grid();
 
-  void setTile(int x, int y);
+  void setTile(int x, int y); // coords in tiles
+  void setTile(float x, float y); // coords in mm
   unsigned char* getGrid() { return tiles; };
   
   

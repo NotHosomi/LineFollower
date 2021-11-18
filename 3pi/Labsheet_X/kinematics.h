@@ -1,6 +1,11 @@
 #pragma once
 #include "encoders.h"
 #include <Arduino.h>
+#include "defines.h"
+#if MAPPING_GRID
+#include "Grid.h"
+#include "FSM.h"
+#endif
 
 #define WHEEL_RAD 16 //mm
 #define AXEL_LEN 86  //mm
@@ -71,6 +76,21 @@ public:
     //Serial.print(netR);
     //Serial.println(" R ");
     #endif
+
+    // GRID MAPPING
+#if MAPPING_GRID
+  double* gsv = FSM::instance->gsv;
+  if(gsv[GSLL] < -0.5)
+    Grid::instance->setTile(x + LSO_OUTER_X, y - LSO_OUTER_Y);
+  if(gsv[GSL] < -0.5)
+    Grid::instance->setTile(x + LSO_INNER_X, y - LSO_INNER_Y);
+  if(gsv[GSC] < -0.5)
+    Grid::instance->setTile(x + LSO_CENTER_X, y);
+  if(gsv[GSR] < -0.5)
+    Grid::instance->setTile(x + LSO_INNER_X, y + LSO_INNER_Y);
+  if(gsv[GSRR] < -0.5)
+    Grid::instance->setTile(x + LSO_OUTER_X, y + LSO_OUTER_Y);
+#endif
   }
 
   //static int getCountL()

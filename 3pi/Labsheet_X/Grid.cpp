@@ -16,6 +16,7 @@ Grid::Grid()
   {
     tiles[i] = 0;
   }
+  instance = this;
 }
 
 Grid::~Grid()
@@ -24,6 +25,8 @@ Grid::~Grid()
   {
     tiles[i] = 0;
   }
+  if(instance == this)
+    instance = nullptr;
 }
 
 void Grid::setTile(int x, int y)
@@ -39,5 +42,10 @@ void Grid::setTile(int x, int y)
   int bindex = x % 8;
   // 128U is b00000000'00000000'00000000'00000000'10000000
   tiles[index] |= 128U >> bindex;
+}
+
+void Grid::setTile(float x, float y)
+{
+  setTile((int)(x / G_SCALE), (int)(y / G_SCALE));
 }
 #endif

@@ -70,3 +70,10 @@
   #define MIN_R  -600.0
   #define MIN_RR -600.0
 #endif
+
+// LS offsets
+#define LSO_OUTER_X 29.870f
+#define LSO_OUTER_Y 30.932f
+#define LSO_INNER_X 43.034f
+#define LSO_INNER_Y -9.148f
+#define LSO_CENTER_X 44.0f
