@@ -1,18 +1,25 @@
 #pragma once
-#define G_HEIGHT 64
-#define G_WIDTH 32 // should be divisible by 8
-#SIZE G_HEIGHT * G_WIDTH/8
+
+// mem footprint (256 x 256)
+//  256 x (8 x 32)
+//  256 x 32  =  8480 bytes
+// without bitset implementation:
+//  256 x 256 = 67840 bytes
+#define G_HEIGHT 256
+#define G_WIDTH 256 // should be divisible by 8
+#define SIZE G_HEIGHT * G_WIDTH/8
+
 
 class Grid
 {
 public:
-  Grid() = default;
+  Grid();
   ~Grid();
 
-  setTile(int x, int y);
-  char* getGrid() { return tiles };
+  void setTile(int x, int y);
+  unsigned char* getGrid() { return tiles };
   
   
 private:
-  char[G_HEIGHT * G_WIDTH/8] tiles;
+  unsigned char[G_HEIGHT * G_WIDTH/8] tiles;
 }
