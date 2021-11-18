@@ -90,8 +90,7 @@ void run(std::ofstream& file, Serial* port)
         {
             length = port->ReadData(buffer, buffer_size);
             buffer[length] = 0;
-            truncateBuffer(buffer, length);
-            saveSample(buffer, genLabels(), file);
+
             tmr.mark();
         }
 

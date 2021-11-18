@@ -1,11 +1,11 @@
 //
-// Created by Hosomi on 27/09/2020.
+// Created by Anna on 27/09/2020.
 //
 #include "Serial.h"
 
 Serial::Serial(const char* portName)
 {
-    //We're not yet connected
+    // not yet connected
     this->connected = false;
 
     //Try to connect to the given port throuh CreateFile
