@@ -10,7 +10,7 @@
 #define DEBUG_ODO    false
 
 // Mapping types
-#define MAPPING_GRID true
+#define MAPPING_GRID false
 #define MAPPING_POINTS false
 #define MAPPING_CHAIN false
 
@@ -23,6 +23,9 @@
 #define LED_PIN_Y 13
 #define LED_PIN_G 30
 #define LED_PIN_R 17
+#define PIN_BUTTON_A 14
+#define PIN_BUTTON_B 30
+#define PIN_BUTTON_C 17
 #define PIN_BUZZ 6
 #define R_PWM_PIN 9 // A9
 #define L_PWM_PIN 10 // A10

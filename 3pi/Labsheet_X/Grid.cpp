@@ -1,6 +1,6 @@
+#if MAPPING_GRID
 #include "Grid.h"
 #include "defines.h"
-#if MAPPING_GRID
 
 #define OFFSET_X G_WIDTH/2
 #define OFFSET_Y G_HEIGHT/10
@@ -48,4 +48,13 @@ void Grid::setTile(float x, float y)
 {
   setTile((int)(x / G_SCALE), (int)(y / G_SCALE));
 }
+
+void dump()
+{
+  Serial.write('G');
+  Serial.write(char(G_HEIGHT));
+  Serial.write(char(G_WIDTH));
+  Serial.write(tiles);
+}
+
 #endif

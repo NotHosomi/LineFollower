@@ -8,8 +8,9 @@
 
 boolean led_state;
 Kinematics_c odometry;
-Grid grid;
-
+#if MAPPING_GRID
+  Grid grid;
+#endif
 
 float t = 0;
 
@@ -25,10 +26,12 @@ void setup() {
   pinMode( LED_PIN_G, OUTPUT );
   pinMode( LED_PIN_R, OUTPUT );
   pinMode( PIN_BUZZ, OUTPUT );
+  pinMode( LED_PIN_Y, OUTPUT );
   digitalWrite(LED_PIN_Y, LOW);
   digitalWrite(LED_PIN_G, LOW);
   digitalWrite(LED_PIN_R, LOW);
   digitalWrite(PIN_BUZZ, LOW);
+  pinMode( PIN_BUTTON_A, INPUT );
   /*pinMode( L_PWM_PIN, OUTPUT );
   pinMode( R_PWM_PIN, OUTPUT );
   pinMode( R_DIR_PIN, OUTPUT );
@@ -65,9 +68,9 @@ char buffer[100] = "";
 void loop() {
   //dT = micros() - pT;
   //pT = micros();
-  LineSensors::refresh(gsv);
+  //LineSensors::refresh(gsv);
   //FSM::gotoState();
-  odometry.update();
+  //odometry.update();
 
   // odometry test
   //if(micros() - t > 3000000)
@@ -75,6 +78,13 @@ void loop() {
   //  Motors::setRMotor(0);
   //  Motors::setLMotor(0);
   //}
+
+  if(!digitalRead(PIN_BUTTON_A))
+  {
+    #if MAPPING_GRID
+    grid.dump();
+    #endif
+  }
   
   delay(32);
 }

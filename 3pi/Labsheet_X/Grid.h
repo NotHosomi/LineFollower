@@ -1,5 +1,6 @@
 #pragma once
-//#if MAPPING_GRID
+#if MAPPING_GRID
+#include <Arduino.h>
 
 
 // example grid mem footprint (256 x 256) = 256 x (8 x 32)
@@ -36,9 +37,10 @@ public:
   void setTile(int x, int y); // coords in tiles
   void setTile(float x, float y); // coords in mm
   unsigned char* getGrid() { return tiles; };
+  void dump();
   
   
 private:
   unsigned char tiles[BYTES];
 };
-//#endif
+#endif

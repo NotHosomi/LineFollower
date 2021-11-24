@@ -75,16 +75,16 @@ public:
     rot += phi;
 
     #if DEBUG_ODO
-    Serial.print(x);
-    Serial.print(" X ");
-    Serial.print(y);
-    Serial.print(" Y ");
-    Serial.print(rot);
-    Serial.print(" Th ");
-    //Serial.print(netL);
-    //Serial.print(" L ");
-    //Serial.print(netR);
-    //Serial.println(" R ");
+      Serial.print(x);
+      Serial.print(" X ");
+      Serial.print(y);
+      Serial.print(" Y ");
+      Serial.print(rot);
+      Serial.print(" Th ");
+      //Serial.print(netL);
+      //Serial.print(" L ");
+      //Serial.print(netR);
+      //Serial.println(" R ");
     #endif
 
     // GRID MAPPING
@@ -102,11 +102,6 @@ public:
     Grid::instance->setTile(x + LSO_OUTER_X, y + LSO_OUTER_Y);
 #endif
   }
-
-  //static int getCountL()
-  //{
-  //  return count_eL;
-  //}
 
   
   float x = 0;
