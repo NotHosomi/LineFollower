@@ -68,9 +68,9 @@ char buffer[100] = "";
 void loop() {
   //dT = micros() - pT;
   //pT = micros();
-  //LineSensors::refresh(gsv);
-  //FSM::gotoState();
-  //odometry.update();
+  LineSensors::refresh(gsv);
+  FSM::gotoState();
+  odometry.update();
 
   // odometry test
   //if(micros() - t > 3000000)
