@@ -58,11 +58,21 @@ public:
     L *= COUNT2MM;
     R *= COUNT2MM;
     
-    double dist = (L / 2) + (R / 2);
+    double ICR_offset = 0;
+    double dist = 0;
+    double phi = (L - R) / AXEL_LEN;
+    if(L!=R)
+    {
+      ICR_offset = AXEL_LEN/2 * (L+R)/(L-R);
+      dist = ICR_offset * phi; // could improve accuracy further by taking the chord of this arc
+    }
+    else
+    {
+      dist = (L / 2) + (R / 2);
+    }
     x += dist * cos(rot);
     y += dist * sin(rot);
-  
-    rot += ((L / AXEL_LEN) - (R / AXEL_LEN));
+    rot += phi;
 
     #if DEBUG_ODO
     Serial.print(x);
