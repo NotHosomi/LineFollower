@@ -12,7 +12,18 @@ namespace Decoder
 	{
 		OP_GRID = 'G',
 		OP_TRACE = 'T',
-		OP_VEC = 'V'
+		OP_EVENTS = 'E'
+	};
+	struct point
+	{
+		point() = default;
+		point(short _x, short _y)
+		{
+			x = _x;
+			y = _y;
+		}
+		short x = 0;
+		short y = 0;
 	};
 };
 
