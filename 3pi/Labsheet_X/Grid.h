@@ -1,4 +1,5 @@
 #pragma once
+#include "defines.h"
 #if MAPPING_GRID
 #include <Arduino.h>
 
@@ -30,17 +31,15 @@
 class Grid
 {
 public:
-  static Grid* instance;
   Grid();
-  ~Grid();
 
   void setTile(int x, int y); // coords in tiles
-  void setTile(float x, float y); // coords in mm
+  void setTile(double x, double y); // coords in mm
   unsigned char* getGrid() { return tiles; };
   void dump();
   
   
 private:
-  unsigned char tiles[BYTES];
+  char tiles[BYTES];
 };
 #endif

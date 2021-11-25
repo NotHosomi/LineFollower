@@ -7,16 +7,17 @@ class FSM {
 private:
 
 public:
-  FSM()
+  FSM(double* p_gsv)
   {
     FSM::instance = this;
+    gsv = p_gsv; // local accessor to the global ground sensor value array
   }
   //~FSM();
   static bool gotoState();
 
   // TODO: get Serial working outside of .ino
   static FSM* instance;
-  double gsv[5] = {0, 0, 0, 0, 0};
+  double* gsv;//[5] = {0, 0, 0, 0, 0};
   
 private:
   

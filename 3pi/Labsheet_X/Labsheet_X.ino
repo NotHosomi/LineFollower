@@ -10,9 +10,12 @@ boolean led_state;
 Kinematics_c odometry;
 #if MAPPING_GRID
   Grid grid;
+#elif MAPPING_TRACE
+  Trace trace;
 #endif
 
 float t = 0;
+double gsv[5] = { 0, 0, 0, 0, 0};
 
 // put your setup code here, to run once:
 void setup() {
@@ -45,7 +48,7 @@ void setup() {
   Motors::init();
   LineSensors::init();
   odometry = Kinematics_c();
-  new FSM();
+  new FSM(gsv);
 
   // Set initial state of the LED
   led_state = false;
@@ -59,8 +62,6 @@ void setup() {
   t = micros();
 }
 
-double gsv[5] = { 0, 0, 0, 0, 0};
-
 // put your main code here, to run repeatedly:
 unsigned int dT = 0; // delta time
 unsigned long pT = 0; // prev time
@@ -70,20 +71,23 @@ void loop() {
   //pT = micros();
   LineSensors::refresh(gsv);
   FSM::gotoState();
+  
+  #if MAPPING_GRID
+  odometry.update(&grid, gsv);
+  #elif MAPPING_TRACE
+  odometry.update(&trace, gsv);
+  #else
   odometry.update();
-
-  // odometry test
-  //if(micros() - t > 3000000)
-  //{
-  //  Motors::setRMotor(0);
-  //  Motors::setLMotor(0);
-  //}
+  #endif
 
   if(!digitalRead(PIN_BUTTON_A))
   {
     #if MAPPING_GRID
     grid.dump();
+    #elif MAPPING_TRACE
+    trace.dump();
     #endif
+    delay(10000);
   }
   
   delay(32);

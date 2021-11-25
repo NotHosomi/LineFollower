@@ -3,8 +3,9 @@
 #include <Arduino.h>
 #include "defines.h"
 #if MAPPING_GRID
-#include "Grid.h"
-#include "FSM.h"
+  #include "Grid.h"
+#elif MAPPING_TRACE
+  #include "Trace.h"
 #endif
 
 #define WHEEL_RAD 16 //mm
@@ -40,7 +41,13 @@ public:
   // your kinematics
   //double netL = 0;
   //double netR = 0;
+  #if MAPPING_GRID
+  void update(Grid* grid, double* gsv)
+  #elif MAPPING_TRACE
+  void update(Trace* trace, double* gsv)
+  #else
   void update()
+  #endif
   {
     #if DEBUG_ENCODE
     char buffer[50];
@@ -89,17 +96,55 @@ public:
 
     // GRID MAPPING
 #if MAPPING_GRID
-  double* gsv = FSM::instance->gsv;
-  if(gsv[GSLL] < -0.5)
-    Grid::instance->setTile(x + LSO_OUTER_X, y - LSO_OUTER_Y);
-  if(gsv[GSL] < -0.5)
-    Grid::instance->setTile(x + LSO_INNER_X, y - LSO_INNER_Y);
-  if(gsv[GSC] < -0.5)
-    Grid::instance->setTile(x + LSO_CENTER_X, y);
-  if(gsv[GSR] < -0.5)
-    Grid::instance->setTile(x + LSO_INNER_X, y + LSO_INNER_Y);
-  if(gsv[GSRR] < -0.5)
-    Grid::instance->setTile(x + LSO_OUTER_X, y + LSO_OUTER_Y);
+    if(gsv[GSLL] < -0.5)
+      grid->setTile(x + LSO_OUTER_X*cos(rot), y - LSO_OUTER_Y*sin(rot));
+    if(gsv[GSL] < -0.5)
+      grid->setTile(x + LSO_INNER_X*cos(rot), y - LSO_INNER_Y*sin(rot));
+    if(gsv[GSC] < -0.5)
+      grid->setTile(x + LSO_CENTER_X*cos(rot), y);
+    if(gsv[GSR] < -0.5)
+      grid->setTile(x + LSO_INNER_X*cos(rot), y + LSO_INNER_Y*sin(rot));
+    if(gsv[GSRR] < -0.5)
+      grid->setTile(x + LSO_OUTER_X*cos(rot), y + LSO_OUTER_Y*sin(rot));
+#elif MAPPING_TRACE
+    float avg_x = 0;
+    float avg_y = 0;
+  
+    int hits = 0;
+    if(gsv[GSLL] < -0.5)
+    {
+      avg_x += LSO_OUTER_X*cos(rot);
+      avg_y += LSO_OUTER_Y*sin(rot);
+      ++hits;
+    }
+    if(gsv[GSL] < -0.5)
+    {
+      avg_x +=  LSO_INNER_X*cos(rot);
+      avg_y += LSO_INNER_Y*sin(rot);
+      ++hits;
+    }
+    if(gsv[GSC] < -0.5)
+    {
+      avg_x += LSO_OUTER_X*cos(rot);
+      ++hits;
+    }
+    if(gsv[GSR] < -0.5)
+    {
+      avg_x += LSO_INNER_X;
+      avg_y += LSO_INNER_Y*sin(rot);
+      ++hits;
+    }
+    if(gsv[GSRR] < -0.5)
+    {
+      avg_x += LSO_OUTER_X*cos(rot);
+      avg_y += LSO_OUTER_Y;
+      ++hits;
+    } 
+    avg_x /= hits;
+    avg_y /= hits;
+    avg_x += x;
+    avg_y += y;
+    trace->addPoint(round(x), round(y));
 #endif
   }
 

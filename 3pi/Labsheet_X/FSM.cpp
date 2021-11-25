@@ -12,8 +12,6 @@ static bool FSM::gotoState()
 {
   if(instance == nullptr)
     return true;
-  // update sensor values
-  LineSensors::refresh(FSM::instance->gsv);
   switch(instance->state)
   {
   case State::LINE_NONE: instance->lineNone();

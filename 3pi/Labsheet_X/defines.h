@@ -10,9 +10,9 @@
 #define DEBUG_ODO    false
 
 // Mapping types
-#define MAPPING_GRID false
-#define MAPPING_POINTS false
-#define MAPPING_CHAIN false
+#define MAPPING_GRID true
+#define MAPPING_TRACE false
+#define MAPPING_EVENTS false
 
 #define LINETURN_ALPHA true
 #define TURN_AGGRESSION 0.5
