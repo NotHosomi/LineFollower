@@ -59,19 +59,29 @@
 #define SCALE_R  1200.0
 #define SCALE_RR 1100.0
 
-#define DARK false
+#define DARK true
 #if DARK
   #define MIN_LL -800.0
   #define MIN_L  -600.0
   #define MIN_C  -600.0
   #define MIN_R  -800.0
   #define MIN_RR -1000.0
+  #define SCALE_LL 1500.0
+  #define SCALE_L  1400.0
+  #define SCALE_C  1400.0
+  #define SCALE_R  1600.0
+  #define SCALE_RR 2000.0
 #else
   #define MIN_LL -500.0
   #define MIN_L  -500.0
   #define MIN_C  -500.0
   #define MIN_R  -600.0
   #define MIN_RR -600.0
+  #define SCALE_LL 750.0
+  #define SCALE_L  1000.0
+  #define SCALE_C  1100.0
+  #define SCALE_R  1200.0
+  #define SCALE_RR 1100.0
 #endif
 
 // LS offsets

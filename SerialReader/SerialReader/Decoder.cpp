@@ -11,9 +11,10 @@ void Decoder::decode(char* buffer, int size)
 	buffer = &buffer[1];
 	--size;
 
-	switch (buffer[0])
+	switch (opcode)
 	{
 	case OP_GRID:
+		std::cout << "decode: Grid" << std::endl;
 		decodeGrid(buffer, size);
 		break;
 	case OP_TRACE:
@@ -21,7 +22,9 @@ void Decoder::decode(char* buffer, int size)
 		throw std::invalid_argument("Opcode not yet implemented");
 		break;
 	default:
-		throw std::invalid_argument("Invalid opcode value");
+		//throw std::invalid_argument("Invalid opcode value");
+		std::cout << "invalid opcode"  << opcode << std::endl;
+		return;
 		break;
 	}
 }
@@ -41,18 +44,30 @@ void Decoder::decodeGrid(char* buffer, int size)
 	// extract compressed data
 	std::vector<bool> pixelbuffer;
 	pixelbuffer.reserve(height * width);
+	int count = 0;
 	for (int i = 0; i < height * width / 8; ++i)
 	{
 		for (int bit = 0; bit < 8; ++bit)
 		{
 			pixelbuffer.push_back(buffer[i] & 128u >> bit);
+			if(buffer[i] & 128u >> bit)
+				count++;
 		}
 	}
+	std::cout << "WxH: " << (int)width << ", " << (int)height << std::endl;
+	std::cout << "pixel count: " << count << std::endl;
 
 	// transfer data into bitmap
-	BMP::BMP img(width / 8, height, false);
+	BMP::BMP img(width, height, false);
+
 	for (int y = 0; y < height; ++y)
 		for (int x = 0; x < width; ++x)
-			img.set_pixel(x, y, 255, 255, 255, 0);
+		{
+			if(pixelbuffer[width*y + x])
+				img.set_pixel(x, y, 0, 0, 0, 0);
+			else
+				img.set_pixel(x, y, 255, 255, 255, 0);
+		}
 	img.write("output.bmp");
+	std::cout << "Image written" << std::endl;
 }

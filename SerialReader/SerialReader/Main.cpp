@@ -1,13 +1,24 @@
+
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
+#include <fstream>
 #include "Serial.h"
 #include "Timer.h"
 #include "Decoder.h"
 
-#define PICK_COM true
+#define PICK_COM false
 #define SERIAL_BUFFER_SIZE 1024u
-// Grid encoding (256 x 256) = 8480 bytes
+// Arduino leonardo mem is only 2600 bytess
 #define MESSAGE_BUFFER_SIZE 10000u
 #define EMPTY_BUFFER_MAX_TICKS 5
+
+void saveToFile(char* buffer, int length)
+{
+    std::ofstream file;
+    file.open("log.txt", std::ios::binary);
+    file.write((char*)buffer, length);
+    file.close();
+}
 
 int main()
 {
@@ -71,7 +82,10 @@ int main()
         {
             exit_ticker++;
             if (exit_ticker > EMPTY_BUFFER_MAX_TICKS)
+            {
+                std::cout << "Read complete" << std::endl;
                 break;
+            }
         }
 
         // ADDITIONAL EXIT CONDITIONS:
@@ -80,10 +94,11 @@ int main()
             throw std::runtime_error("Connection lost");
             break;
         }
-        if (!(GetAsyncKeyState(VK_ESCAPE) && 1 << (8 * sizeof(SHORT) - 1)))// if escape pressed, exit
-        {
-            break;
-        }
+        //if (!(GetAsyncKeyState(VK_ESCAPE) && 1 << (8 * sizeof(SHORT) - 1)))// if escape pressed, exit
+        //{
+        //    std::cout << "Exit" << std::endl;
+        //    break;
+        //}
     }; 
     // one-shot program, don't need to worry about resetting the above loop environment
 

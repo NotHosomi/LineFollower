@@ -149,7 +149,6 @@
   <ItemGroup>
     <ClCompile Include="Decoder.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="EMG_examp.cpp" />
     <ClCompile Include="Serial.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>

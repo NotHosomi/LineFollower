@@ -10,3 +10,15 @@
 *.db-wal
 
 *.opendb
+
+*.pdb
+
+*.idb
+
+*.obj
+
+SerialReader/SerialReader/Debug/SerialReader.tlog/
+
+*.log
+
+*.ilk

@@ -57,8 +57,8 @@ void setup() {
   Motors::setRMotor(0);
   Motors::setLMotor(0);
   delay(5000);
-  //Motors::setLMotor(SPEED);
-  //Motors::setRMotor(SPEED);
+  Motors::setLMotor(SPEED);
+  Motors::setRMotor(SPEED);
   t = micros();
 }
 
