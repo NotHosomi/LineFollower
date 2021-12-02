@@ -8,8 +8,9 @@
 
 #define PICK_COM false
 #define SERIAL_BUFFER_SIZE 1024u
-// Arduino leonardo mem is only 2600 bytess
-#define MESSAGE_BUFFER_SIZE 10000u
+// Arduino leonardo mem is only 2600 bytes
+// 2600 * 8
+#define MESSAGE_BUFFER_SIZE 100000u
 #define EMPTY_BUFFER_MAX_TICKS 5
 
 void saveToFile(char* buffer, int length)
@@ -99,9 +100,12 @@ int main()
         //    std::cout << "Exit" << std::endl;
         //    break;
         //}
+
+        Sleep(100); // allow buffer to be filled
     }; 
     // one-shot program, don't need to worry about resetting the above loop environment
 
+    std::cout << msg_len << " bytes recieved" << std::endl;
     Decoder::decode(msg_buffer, msg_len);
 
     delete port;

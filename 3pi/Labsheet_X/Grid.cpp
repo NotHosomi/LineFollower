@@ -43,7 +43,27 @@ void Grid::dump()
   Serial.write('G');
   Serial.write(char(G_HEIGHT));
   Serial.write(char(G_WIDTH));
-  Serial.write(tiles);
+  for(size_t i = 0; i < BYTES; ++i)
+    Serial.write(tiles[i]);
+}
+
+void Grid::debug()
+{
+  Serial.write('H');
+  Serial.write(char(G_HEIGHT));
+  Serial.write(char(G_WIDTH));
+  for(size_t i = 0; i < BYTES; ++i)
+  {
+    for(int b = 0; b < 8; ++b)
+    {
+      if((bool)(tiles[i] & 128u >> b))
+        Serial.print('1');
+      else
+        Serial.print('0');
+    }
+    if(i % G_WIDTH == 0)
+      Serial.print('\n');
+  }      
 }
 
 #endif

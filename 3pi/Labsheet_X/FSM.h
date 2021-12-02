@@ -29,7 +29,8 @@ private:
     LINE_FOLLOW,     // we have a line
     LINE_MISSING,    // hoping for line
     LINE_LOST_TURN,  // returning to Line
-    LINE_LOST_TRAVEL // returning to line
+    LINE_LOST_TRAVEL,// returning to line
+    LINE_FINISHED
   };
   State state = LINE_NONE;
 

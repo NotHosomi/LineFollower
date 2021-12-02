@@ -25,16 +25,18 @@ void setup() {
   Serial.println("***RESET***");
 
   // Set LED pin as an output
-  pinMode( LED_PIN_Y, OUTPUT );
-  pinMode( LED_PIN_G, OUTPUT );
-  pinMode( LED_PIN_R, OUTPUT );
+  //pinMode( LED_PIN_Y, OUTPUT );
+  //pinMode( LED_PIN_G, OUTPUT );
+  //pinMode( LED_PIN_R, OUTPUT );
   pinMode( PIN_BUZZ, OUTPUT );
   pinMode( LED_PIN_Y, OUTPUT );
-  digitalWrite(LED_PIN_Y, LOW);
-  digitalWrite(LED_PIN_G, LOW);
-  digitalWrite(LED_PIN_R, LOW);
+  //digitalWrite(LED_PIN_Y, LOW);
+  //digitalWrite(LED_PIN_G, LOW);
+  //digitalWrite(LED_PIN_R, LOW);
   digitalWrite(PIN_BUZZ, LOW);
   pinMode( PIN_BUTTON_A, INPUT );
+  pinMode( PIN_BUTTON_B, INPUT );
+  pinMode( PIN_BUTTON_C, INPUT );
   /*pinMode( L_PWM_PIN, OUTPUT );
   pinMode( R_PWM_PIN, OUTPUT );
   pinMode( R_DIR_PIN, OUTPUT );
@@ -87,7 +89,21 @@ void loop() {
     #elif MAPPING_TRACE
     trace.dump();
     #endif
-    delay(10000);
+    delay(1500);
+  }
+  if(!digitalRead(PIN_BUTTON_B))
+  {
+    #if MAPPING_GRID
+    grid.debug();
+    #elif MAPPING_TRACE
+    trace.debug();
+    #endif
+    delay(1500);
+  }
+  if(!digitalRead(PIN_BUTTON_C))
+  {
+    Serial.println(millis()/1000);
+    delay(500);
   }
   
   delay(32);

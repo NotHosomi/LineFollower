@@ -37,6 +37,7 @@ public:
   void setTile(double x, double y); // coords in mm
   unsigned char* getGrid() { return tiles; };
   void dump();
+  void debug();
   
   
 private:
