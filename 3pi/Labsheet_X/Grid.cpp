@@ -1,6 +1,6 @@
-#include "Grid.h"
 #include "defines.h"
 #if MAPPING_GRID
+#include "Grid.h"
 
 #define OFFSET_X G_WIDTH/2
 #define OFFSET_Y G_HEIGHT/10
@@ -16,17 +16,6 @@ Grid::Grid()
   {
     tiles[i] = 0;
   }
-  instance = this;
-}
-
-Grid::~Grid()
-{
-  for(int i = 0; i < BYTES; ++i)
-  {
-    tiles[i] = 0;
-  }
-  if(instance == this)
-    instance = nullptr;
 }
 
 void Grid::setTile(int x, int y)
@@ -44,8 +33,37 @@ void Grid::setTile(int x, int y)
   tiles[index] |= 128U >> bindex;
 }
 
-void Grid::setTile(float x, float y)
+void Grid::setTile(double x, double y)
 {
   setTile((int)(x / G_SCALE), (int)(y / G_SCALE));
 }
+
+void Grid::dump()
+{
+  Serial.write('G');
+  Serial.write(char(G_HEIGHT));
+  Serial.write(char(G_WIDTH));
+  for(size_t i = 0; i < BYTES; ++i)
+    Serial.write(tiles[i]);
+}
+
+void Grid::debug()
+{
+  Serial.write('H');
+  Serial.write(char(G_HEIGHT));
+  Serial.write(char(G_WIDTH));
+  for(size_t i = 0; i < BYTES; ++i)
+  {
+    for(int b = 0; b < 8; ++b)
+    {
+      if((bool)(tiles[i] & 128u >> b))
+        Serial.print('1');
+      else
+        Serial.print('0');
+    }
+    if(i % G_WIDTH == 0)
+      Serial.print('\n');
+  }      
+}
+
 #endif

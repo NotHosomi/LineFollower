@@ -3,8 +3,9 @@
 #include <Arduino.h>
 #include "defines.h"
 #if MAPPING_GRID
-#include "Grid.h"
-#include "FSM.h"
+  #include "Grid.h"
+#elif MAPPING_TRACE
+  #include "Trace.h"
 #endif
 
 #define WHEEL_RAD 16 //mm
@@ -40,7 +41,13 @@ public:
   // your kinematics
   //double netL = 0;
   //double netR = 0;
+  #if MAPPING_GRID
+  void update(Grid* grid, double* gsv)
+  #elif MAPPING_TRACE
+  void update(Trace* trace, double* gsv)
+  #else
   void update()
+  #endif
   {
     #if DEBUG_ENCODE
     char buffer[50];
@@ -58,45 +65,88 @@ public:
     L *= COUNT2MM;
     R *= COUNT2MM;
     
-    double dist = (L / 2) + (R / 2);
+    double ICR_offset = 0;
+    double dist = 0;
+    double phi = (L - R) / AXEL_LEN;
+    if(L!=R)
+    {
+      ICR_offset = AXEL_LEN/2 * (L+R)/(L-R);
+      dist = ICR_offset * phi; // could improve accuracy further by taking the chord of this arc
+    }
+    else
+    {
+      dist = (L / 2) + (R / 2);
+    }
     x += dist * cos(rot);
     y += dist * sin(rot);
-  
-    rot += ((L / AXEL_LEN) - (R / AXEL_LEN));
+    rot += phi;
 
     #if DEBUG_ODO
-    Serial.print(x);
-    Serial.print(" X ");
-    Serial.print(y);
-    Serial.print(" Y ");
-    Serial.print(rot);
-    Serial.print(" Th ");
-    //Serial.print(netL);
-    //Serial.print(" L ");
-    //Serial.print(netR);
-    //Serial.println(" R ");
+      Serial.print(x);
+      Serial.print(" X ");
+      Serial.print(y);
+      Serial.print(" Y ");
+      Serial.print(rot);
+      Serial.print(" Th ");
+      //Serial.print(netL);
+      //Serial.print(" L ");
+      //Serial.print(netR);
+      //Serial.println(" R ");
     #endif
 
     // GRID MAPPING
 #if MAPPING_GRID
-  double* gsv = FSM::instance->gsv;
-  if(gsv[GSLL] < -0.5)
-    Grid::instance->setTile(x + LSO_OUTER_X, y - LSO_OUTER_Y);
-  if(gsv[GSL] < -0.5)
-    Grid::instance->setTile(x + LSO_INNER_X, y - LSO_INNER_Y);
-  if(gsv[GSC] < -0.5)
-    Grid::instance->setTile(x + LSO_CENTER_X, y);
-  if(gsv[GSR] < -0.5)
-    Grid::instance->setTile(x + LSO_INNER_X, y + LSO_INNER_Y);
-  if(gsv[GSRR] < -0.5)
-    Grid::instance->setTile(x + LSO_OUTER_X, y + LSO_OUTER_Y);
+    if(gsv[GSLL] < -0.5)
+      grid->setTile(x + LSO_OUTER_X*cos(rot), y - LSO_OUTER_Y*sin(rot));
+    if(gsv[GSL] < -0.5)
+      grid->setTile(x + LSO_INNER_X*cos(rot), y - LSO_INNER_Y*sin(rot));
+    if(gsv[GSC] < -0.5)
+      grid->setTile(x + LSO_CENTER_X*cos(rot), y);
+    if(gsv[GSR] < -0.5)
+      grid->setTile(x + LSO_INNER_X*cos(rot), y + LSO_INNER_Y*sin(rot));
+    if(gsv[GSRR] < -0.5)
+      grid->setTile(x + LSO_OUTER_X*cos(rot), y + LSO_OUTER_Y*sin(rot));
+#elif MAPPING_TRACE
+    float avg_x = 0;
+    float avg_y = 0;
+  
+    int hits = 0;
+    if(gsv[GSLL] < -0.5)
+    {
+      avg_x += LSO_OUTER_X*cos(rot);
+      avg_y += LSO_OUTER_Y*sin(rot);
+      ++hits;
+    }
+    if(gsv[GSL] < -0.5)
+    {
+      avg_x +=  LSO_INNER_X*cos(rot);
+      avg_y += LSO_INNER_Y*sin(rot);
+      ++hits;
+    }
+    if(gsv[GSC] < -0.5)
+    {
+      avg_x += LSO_OUTER_X*cos(rot);
+      ++hits;
+    }
+    if(gsv[GSR] < -0.5)
+    {
+      avg_x += LSO_INNER_X;
+      avg_y += LSO_INNER_Y*sin(rot);
+      ++hits;
+    }
+    if(gsv[GSRR] < -0.5)
+    {
+      avg_x += LSO_OUTER_X*cos(rot);
+      avg_y += LSO_OUTER_Y;
+      ++hits;
+    } 
+    avg_x /= hits;
+    avg_y /= hits;
+    avg_x += x;
+    avg_y += y;
+    trace->addPoint(round(x), round(y));
 #endif
   }
-
-  //static int getCountL()
-  //{
-  //  return count_eL;
-  //}
 
   
   float x = 0;

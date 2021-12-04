@@ -11,8 +11,8 @@
 
 // Mapping types
 #define MAPPING_GRID true
-#define MAPPING_POINTS false
-#define MAPPING_CHAIN false
+#define MAPPING_TRACE false
+#define MAPPING_EVENTS false
 
 #define LINETURN_ALPHA true
 #define TURN_AGGRESSION 0.5
@@ -23,6 +23,9 @@
 #define LED_PIN_Y 13
 #define LED_PIN_G 30
 #define LED_PIN_R 17
+#define PIN_BUTTON_A 14
+#define PIN_BUTTON_B 30
+#define PIN_BUTTON_C 17
 #define PIN_BUZZ 6
 #define R_PWM_PIN 9 // A9
 #define L_PWM_PIN 10 // A10
@@ -56,19 +59,29 @@
 #define SCALE_R  1200.0
 #define SCALE_RR 1100.0
 
-#define DARK false
+#define DARK true
 #if DARK
   #define MIN_LL -800.0
   #define MIN_L  -600.0
   #define MIN_C  -600.0
   #define MIN_R  -800.0
   #define MIN_RR -1000.0
+  #define SCALE_LL 1500.0
+  #define SCALE_L  1400.0
+  #define SCALE_C  1400.0
+  #define SCALE_R  1600.0
+  #define SCALE_RR 2000.0
 #else
   #define MIN_LL -500.0
   #define MIN_L  -500.0
   #define MIN_C  -500.0
   #define MIN_R  -600.0
   #define MIN_RR -600.0
+  #define SCALE_LL 750.0
+  #define SCALE_L  1000.0
+  #define SCALE_C  1100.0
+  #define SCALE_R  1200.0
+  #define SCALE_RR 1100.0
 #endif
 
 // LS offsets

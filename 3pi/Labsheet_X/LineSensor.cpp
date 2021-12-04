@@ -39,7 +39,6 @@ static void LineSensors::refresh(double* gsv)
     gsv[i] = (int)(t0 - mark[i]); // casting straight from unsigned long to double causes overflow, so had to cast to int first
     gsv[i] = min(gsv[i], gs_min[i]);
     gsv[i] -= gs_min[i];
-    //gsv[i] = max(gsv[i], -gs_scale[i]);
     gsv[i] /= gs_scale[i];
   }
   #if DEBUG_GROUND
