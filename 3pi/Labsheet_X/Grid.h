@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 
+
 // example grid mem footprint (256 x 256) = 256 x (8 x 32)
 // without bitset implementation:
 //  256 x 256 = 67840 bytes // WAYYY too large
@@ -38,7 +39,8 @@ public:
   unsigned char* getGrid() { return tiles; };
   void dump();
   void debug();
-  
+
+  void save();
   
 private:
   char tiles[BYTES];

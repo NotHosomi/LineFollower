@@ -1,6 +1,7 @@
 #include "defines.h"
 #if MAPPING_GRID
 #include "Grid.h"
+# include <EEPROM.h>
 
 #define OFFSET_X G_WIDTH/2
 #define OFFSET_Y G_HEIGHT/10
@@ -65,5 +66,42 @@ void Grid::debug()
       Serial.print('\n');
   }      
 }
+
+#define USHRT_MAX 65535
+void Grid::save()
+{
+  int address = 0;
+  unsigned short contig = 0;
+  bool current = 0;
+  for(int i = 0; i < BYTES; ++i)
+  {
+    for(int b = 0; b < 8; ++b;
+    {
+      auto tile = (bool)(tiles[i] & 128u >> b);
+      if(tile != current)
+      {
+        EEPROM.update(address++, *reinterpretive_cast<char*>(&contig));
+        EEPROM.update(address++, *reinterpretive_cast<char*>((&contig) + 1));
+        current = !current;
+        contig = 0;
+      }
+      else
+      {
+        ++contig;
+        if(contig == USHRT_MAX)
+        {
+          EEPROM.update(address++, *reinterpretive_cast<char*>(&contig));
+          EEPROM.update(address++, *reinterpretive_cast<char*>((&contig) + 1));
+          contig = 0;
+          EEPROM.update(address++, *reinterpretive_cast<char*>(&contig));
+          EEPROM.update(address++, *reinterpretive_cast<char*>((&contig) + 1));
+        }
+      }
+      // todo check this all is correct
+    }
+  }
+}
+
+// todo: implement load
 
 #endif
