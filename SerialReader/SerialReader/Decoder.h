@@ -8,7 +8,7 @@ namespace Decoder
 	void decodeGrid(char* buffer, int size);
 	void decodeGridAlt(char* buffer, int size);
 	void decodeTrace(char* buffer, int size);
-	void decodeVectors(char* buffer, int size);
+
 	enum opcodes : char
 	{
 		OP_GRID = 'G',
@@ -16,16 +16,23 @@ namespace Decoder
 		OP_TRACE = 'T',
 		OP_EVENTS = 'E'
 	};
-	struct point
+	struct Point
 	{
-		point() = default;
-		point(short _x, short _y)
+		Point() = default;
+		Point(short _x, short _y)
 		{
 			x = _x;
 			y = _y;
 		}
-		short x = 0;
-		short y = 0;
+		int x = 0;
+		int y = 0;
+		Point operator+(const Point& lhs)
+		{
+			Point p;
+			p.x = x + lhs.x;
+			p.y = y + lhs.y;
+			return p;
+		}
 	};
 };
 

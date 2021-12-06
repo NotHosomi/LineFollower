@@ -35,10 +35,28 @@ void Trace::save()
 void Trace::load()
 {
   int address = 0;
-  for(int i = 0; i < count; ++i)
+  for(int i = 0; i < BYTES/2; ++i)
   {
     points_x[i] = EEPROM.read(address++);
     points_y[i] = EEPROM.read(address++);
+  }
+}
+
+bool Trace::timer()
+{
+  if(millis()-t_mark > TRACE_TIME)
+  {
+    t_mark = millis();
+    return true;
+  }
+  return false;
+}
+void Trace::debug()
+{
+  Serial.write('T');
+  for(int i = 0; i < BYTES; ++i)
+  {
+    Serial.write(EEPROM.read(i));
   }
 }
 #endif

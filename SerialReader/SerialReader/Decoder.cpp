@@ -22,6 +22,8 @@ void Decoder::decode(char* buffer, int size)
 		decodeGridAlt(buffer, size);
 		break;
 	case OP_TRACE:
+		std::cout << "decode: Trace" << std::endl;
+		decodeTrace(buffer, size);
 	case OP_EVENTS:
 		throw std::invalid_argument("Opcode not yet implemented");
 		break;
@@ -129,16 +131,19 @@ void Decoder::decodeGridAlt (char* buffer, int size)
 	img.write("output.bmp");
 	std::cout << "Image written" << std::endl;
 }
+
 void Decoder::decodeTrace(char* buffer, int size)
 {
 	int count = *reinterpret_cast<int*>(&buffer[0]);
 	buffer = &buffer[sizeof(int)];
-	std::vector<point> points;
-	point mins, maxs;
+	std::vector<Point> points;
+	Point mins, maxs;
 	for (int i = 0; i < count; i += 2*sizeof(short))
 	{
-		points.emplace_back(*reinterpret_cast<int*>(&buffer[i]),
-			*reinterpret_cast<int*>(&buffer[i + sizeof(short)]));
+		//points.emplace_back(*reinterpret_cast<int*>(&buffer[i]),
+		//	*reinterpret_cast<int*>(&buffer[i + sizeof(short)]));
+		points.emplace_back((int)buffer[i], (int)buffer[i + 1]);
+		points.back() = points.back() + points[points.size - 2]; // add this vec to the previous point to get the new point
 
 		if (points.back().x < mins.x)
 			mins.x = points.back().x;
@@ -152,15 +157,17 @@ void Decoder::decodeTrace(char* buffer, int size)
 
 	int width = maxs.x - mins.x;
 	int height = maxs.y - mins.y;
-	BMP::BMP img(width, height, false);
+	BMP::BMP img(width+2, height+2, false);
 	img.set_pixel(points[0].x, points[0].y, 255, 0, 0, 0);
-	img.set_pixel(points.back().x, points.back().y, 0, 255, 255, 0);
-	for (point p : points)
+	for (Point p : points)
 	{
+		p.x += 1 - mins.x;
+		p.y += 1 - mins.y;
 		img.set_pixel(p.x + 1, p.y, 255, 255, 255, 0);
 		img.set_pixel(p.x - 1, p.y, 255, 255, 255, 0);
 		img.set_pixel(p.x, p.y + 1, 255, 255, 255, 0);
 		img.set_pixel(p.x, p.y - 1, 255, 255, 255, 0);
 	}
+	img.set_pixel(points.back().x, points.back().y, 0, 255, 255, 0);
 	img.write("output.bmp");
 }

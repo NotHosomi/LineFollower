@@ -51,6 +51,10 @@ void setup() {
   LineSensors::init();
   odometry = Kinematics_c();
   new FSM(gsv);
+  
+  #if MAPPING_TRACE
+    
+  #endif
 
   // Set initial state of the LED
   led_state = false;
@@ -96,13 +100,17 @@ void loop() {
     #if MAPPING_GRID
     grid.debug();
     #elif MAPPING_TRACE
-    trace.debug();
+    trace.save();
     #endif
     delay(1500);
   }
   if(!digitalRead(PIN_BUTTON_C))
   {
+    Serial.println();
     Serial.println(millis()/1000);
+    Serial.print("Points: ");
+    Serial.println(trace.count);
+    trace.debug();
     delay(500);
   }
   

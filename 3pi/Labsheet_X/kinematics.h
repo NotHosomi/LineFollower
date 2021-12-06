@@ -109,7 +109,7 @@ public:
     
     grid->setTile(x, y); // track bot position, rather than line position
 
-//#elif MAPPING_TRACE
+#elif MAPPING_TRACE
 //    float avg_x = 0;
 //    float avg_y = 0;
 //  
@@ -147,10 +147,13 @@ public:
 //    avg_y /= hits;
 //    avg_x += x;
 //    avg_y += y;
-    trace->addPoint(round(x), round(y));
+    if(trace->timer())
+    {
+      trace->addPoint(round(x), round(y));
+    }
 #endif
   }
-
+  
   
   float x = 0;
   float y = 0;
