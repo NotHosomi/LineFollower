@@ -11,9 +11,7 @@ FSM* FSM::instance = nullptr;
 static bool FSM::gotoState()
 {
   if(instance == nullptr)
-    return true;
-  // update sensor values
-  LineSensors::refresh(FSM::instance->gsv);
+    return false;
   switch(instance->state)
   {
   case State::LINE_NONE: instance->lineNone();
@@ -28,6 +26,8 @@ static bool FSM::gotoState()
     break;
   case State::LINE_LOST_TRAVEL: instance->lineLostTravel();
     break;
+  case State::LINE_FINISHED: 
+    return false;
   }
   #if DEBUG_FSM_C
   Serial.println(instance->state);
@@ -76,7 +76,7 @@ void FSM::lineMissing()
     {
       Motors::setRMotor(0);
       Motors::setLMotor(0);
-      delay(10000);
+      state = LINE_FINISHED;
     }
 }
 
