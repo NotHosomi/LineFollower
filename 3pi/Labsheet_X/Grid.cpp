@@ -62,8 +62,12 @@ void Grid::debug()
       else
         Serial.print('0');
     }
-    if(i % G_WIDTH == 0)
-      Serial.print('\n');
+    //if(i % G_WIDTH == 0)
+    //  Serial.print('\n');
+    if ( i % (G_WIDTH / 8) == 0) {
+      // Paul: had trouble spotting the line end
+      Serial.print(" LINE END\n");
+    }
   }      
 }
 
@@ -75,13 +79,13 @@ void Grid::save()
   bool current = 0;
   for(int i = 0; i < BYTES; ++i)
   {
-    for(int b = 0; b < 8; ++b;
+    for(int b = 0; b < 8; ++b)
     {
       auto tile = (bool)(tiles[i] & 128u >> b);
       if(tile != current)
       {
-        EEPROM.update(address++, *reinterpretive_cast<char*>(&contig));
-        EEPROM.update(address++, *reinterpretive_cast<char*>((&contig) + 1));
+        EEPROM.update(address++, *reinterpret_cast<char*>(&contig));
+        EEPROM.update(address++, *reinterpret_cast<char*>((&contig) + 1));
         current = !current;
         contig = 0;
       }
@@ -90,11 +94,11 @@ void Grid::save()
         ++contig;
         if(contig == USHRT_MAX)
         {
-          EEPROM.update(address++, *reinterpretive_cast<char*>(&contig));
-          EEPROM.update(address++, *reinterpretive_cast<char*>((&contig) + 1));
+          EEPROM.update(address++, *reinterpret_cast<char*>(&contig));
+          EEPROM.update(address++, *reinterpret_cast<char*>((&contig) + 1));
           contig = 0;
-          EEPROM.update(address++, *reinterpretive_cast<char*>(&contig));
-          EEPROM.update(address++, *reinterpretive_cast<char*>((&contig) + 1));
+          EEPROM.update(address++, *reinterpret_cast<char*>(&contig));
+          EEPROM.update(address++, *reinterpret_cast<char*>((&contig) + 1));
         }
       }
       if(address == 1024)
@@ -112,7 +116,11 @@ void Grid::save()
 
 void Grid::load()
 {
-  
+  Serial.write('C');
+  Serial.write(char(G_HEIGHT));
+  Serial.write(char(G_WIDTH));
+  for(size_t i = 0; i < 1024; ++i)
+    Serial.write(EEPROM.read(i));
 }
 
 #endif

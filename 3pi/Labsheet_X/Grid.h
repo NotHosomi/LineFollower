@@ -41,6 +41,7 @@ public:
   void debug();
 
   void save();
+  void load();
   
 private:
   char tiles[BYTES];
