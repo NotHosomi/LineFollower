@@ -97,11 +97,22 @@ void Grid::save()
           EEPROM.update(address++, *reinterpretive_cast<char*>((&contig) + 1));
         }
       }
+      if(address == 1024)
+        break;
       // todo check this all is correct
     }
   }
+  if(address < 1020)
+  {
+    for(int i = 0; i<4; ++i)
+      EEPROM.update(address++, char(0));
+  }
+  
 }
 
-// todo: implement load
+void Grid::load()
+{
+  
+}
 
 #endif
