@@ -51,10 +51,6 @@ void setup() {
   LineSensors::init();
   odometry = Kinematics_c();
   new FSM(gsv);
-  
-  #if MAPPING_TRACE
-    
-  #endif
 
   // Set initial state of the LED
   led_state = false;
@@ -76,15 +72,16 @@ void loop() {
   //dT = micros() - pT;
   //pT = micros();
   LineSensors::refresh(gsv);
-  FSM::gotoState();
-  
-  #if MAPPING_GRID
-  odometry.update(&grid, gsv);
-  #elif MAPPING_TRACE
-  odometry.update(&trace, gsv);
-  #else
-  odometry.update();
-  #endif
+  if(FSM::gotoState())
+  {
+    #if MAPPING_GRID
+    odometry.update(&grid, gsv);
+    #elif MAPPING_TRACE
+    odometry.update(&trace, gsv);
+    #else
+    odometry.update();
+    #endif
+  }
 
   if(!digitalRead(PIN_BUTTON_A))
   {

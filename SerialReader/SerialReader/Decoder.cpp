@@ -24,6 +24,7 @@ void Decoder::decode(char* buffer, int size)
 	case OP_TRACE:
 		std::cout << "decode: Trace" << std::endl;
 		decodeTrace(buffer, size);
+		break;
 	case OP_EVENTS:
 		throw std::invalid_argument("Opcode not yet implemented");
 		break;
@@ -134,16 +135,25 @@ void Decoder::decodeGridAlt (char* buffer, int size)
 
 void Decoder::decodeTrace(char* buffer, int size)
 {
-	int count = *reinterpret_cast<int*>(&buffer[0]);
-	buffer = &buffer[sizeof(int)];
+	//int count = *reinterpret_cast<unsigned short*>(&buffer[0]);	// TODO: remove this line after next upload
+	//std::cout << 2 * count + 2 << " bytes expected" << std::endl;	// TODO: remove this line after next upload
+	buffer = &buffer[sizeof(short)];								// TODO: remove this line after next upload
+
 	std::vector<Point> points;
+	points.emplace_back(0, 0);
 	Point mins, maxs;
-	for (int i = 0; i < count; i += 2*sizeof(short))
+	for (int i = 0; i < size - sizeof(short); i += 2)
 	{
 		//points.emplace_back(*reinterpret_cast<int*>(&buffer[i]),
 		//	*reinterpret_cast<int*>(&buffer[i + sizeof(short)]));
 		points.emplace_back((int)buffer[i], (int)buffer[i + 1]);
-		points.back() = points.back() + points[points.size - 2]; // add this vec to the previous point to get the new point
+		points.back() = points.back() + points[points.size() - 2]; // add this vec to the previous point to get the new point
+		if (points.back() == points[points.size() - 2])
+		{
+			std::cout << "Hit exit bytecode" << std::endl;
+			points.pop_back();
+			break; // Hit the exit code. This should just be a redundant safeguard though
+		}
 
 		if (points.back().x < mins.x)
 			mins.x = points.back().x;
@@ -155,18 +165,23 @@ void Decoder::decodeTrace(char* buffer, int size)
 			mins.y = points.back().y;
 	}
 
+	const int margin = 10;
 	int width = maxs.x - mins.x;
 	int height = maxs.y - mins.y;
-	BMP::BMP img(width+2, height+2, false);
-	img.set_pixel(points[0].x, points[0].y, 255, 0, 0, 0);
-	for (Point p : points)
+	BMP::BMP img(width+2*margin, height+2*margin, false);
+	img.fill_region(0, 0, width, height, 255, 255, 255, 0);
+	for (Point& p : points)
 	{
-		p.x += 1 - mins.x;
-		p.y += 1 - mins.y;
-		img.set_pixel(p.x + 1, p.y, 255, 255, 255, 0);
-		img.set_pixel(p.x - 1, p.y, 255, 255, 255, 0);
-		img.set_pixel(p.x, p.y + 1, 255, 255, 255, 0);
-		img.set_pixel(p.x, p.y - 1, 255, 255, 255, 0);
+		p.x += margin - mins.x;
+		p.y += margin - mins.y;
+	}
+	img.set_pixel(points[0].x, points[0].y, 255, 0, 0, 0);
+	for (Point& p : points)
+	{
+		img.set_pixel(p.x + 1, p.y, 0, 0, 0, 0);
+		img.set_pixel(p.x - 1, p.y, 0, 0, 0, 0);
+		img.set_pixel(p.x, p.y + 1, 0, 0, 0, 0);
+		img.set_pixel(p.x, p.y - 1, 0, 0, 0, 0);
 	}
 	img.set_pixel(points.back().x, points.back().y, 0, 255, 255, 0);
 	img.write("output.bmp");

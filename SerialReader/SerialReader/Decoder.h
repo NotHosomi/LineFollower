@@ -33,6 +33,10 @@ namespace Decoder
 			p.y = y + lhs.y;
 			return p;
 		}
+		inline bool operator==(const Point& rhs)
+		{
+			return x == rhs.x && y == rhs.y;
+		}
 	};
 };
 

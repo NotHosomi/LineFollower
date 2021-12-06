@@ -32,7 +32,7 @@ static bool FSM::gotoState()
   #if DEBUG_FSM_C
   Serial.println(instance->state);
   #endif
-  return false;
+  return true;
 }
 
 /*--------------------

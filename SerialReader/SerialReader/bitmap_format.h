@@ -205,7 +205,7 @@ namespace BMP {
             if (x0 >= (uint32_t)bmp_info_header.width || y0 >= (uint32_t)bmp_info_header.height || x0 < 0 || y0 < 0) {
                 throw std::runtime_error("The point is outside the image boundaries!");
             }
-
+            
             uint32_t channels = bmp_info_header.bit_count / 8;
             data[channels * (y0 * bmp_info_header.width + x0) + 0] = B;
             data[channels * (y0 * bmp_info_header.width + x0) + 1] = G;
