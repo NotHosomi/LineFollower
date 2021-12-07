@@ -99,10 +99,30 @@ bool Trace::timer()
 void Trace::debug()
 {
   Serial.print("Values: ");
-  for(int i = sizeof(count); i < BYTES; ++i)
+  for(int i = 0; i < BYTES; ++i)
   {
     Serial.print((int)(char)EEPROM.read(i));
     Serial.print(" ");
+  }
+  Serial.println();
+
+  load();
+  Serial.write('T');
+  for(int i = 0; i < count; ++i)
+  {
+    Serial.print((int)points_x[i]);
+    Serial.print("_");
+    Serial.print((int)points_y[i]);
+    Serial.print("  ");
+  }
+  Serial.println();
+  Serial.write('T');
+  for(int i = 0; i < count; ++i)
+  {
+    Serial.print(points_x[i]);
+    Serial.print("_");
+    Serial.print(points_y[i]);
+    Serial.print("  ");
   }
   Serial.println();
 }

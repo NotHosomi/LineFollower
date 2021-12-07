@@ -135,22 +135,17 @@ void Decoder::decodeGridAlt (char* buffer, int size)
 
 void Decoder::decodeTrace(char* buffer, int size)
 {
-	//int count = *reinterpret_cast<unsigned short*>(&buffer[0]);	// TODO: remove this line after next upload
-	//std::cout << 2 * count + 2 << " bytes expected" << std::endl;	// TODO: remove this line after next upload
-	//buffer = &buffer[sizeof(short)];								// TODO: remove this line after next upload
-
 	std::vector<Point> points;
 	points.emplace_back(0, 0);
 	Point mins, maxs;
 	for (int i = 0; i < size - sizeof(short); i += 2)
 	{
-		//points.emplace_back(*reinterpret_cast<int*>(&buffer[i]),
-		//	*reinterpret_cast<int*>(&buffer[i + sizeof(short)]));
 		points.emplace_back((int)buffer[i], (int)buffer[i + 1]);
 		points.back() = points.back() + points[points.size() - 2]; // add this vec to the previous point to get the new point
+		std::cout << "\t" << points.back().x << "\t" << points.back().y << std::endl;
 		if (points.back() == points[points.size() - 2])
 		{
-			std::cout << "Hit exit bytecode" << std::endl;
+			std::cout << "Hit exit bytecode at address: " << i << std::endl;
 			points.pop_back();
 			break; // Hit the exit code. This should just be a redundant safeguard though
 		}
