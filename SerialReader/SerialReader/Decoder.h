@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "bitmap_format.h"
 
 namespace Decoder
 {
@@ -38,5 +39,7 @@ namespace Decoder
 			return x == rhs.x && y == rhs.y;
 		}
 	};
+
+	void drawCirc(BMP::BMP& img, Point c, int r);
 };
 

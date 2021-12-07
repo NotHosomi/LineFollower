@@ -87,7 +87,7 @@ void Decoder::decodeGrid(char* buffer, int size)
 			else
 				img.set_pixel(x, y, 255, 255, 255, 0);
 		}
-	img.write("output.bmp");
+	img.write("output_grid.bmp");
 	std::cout << "Image written" << std::endl;
 }
 
@@ -129,7 +129,7 @@ void Decoder::decodeGridAlt (char* buffer, int size)
 			else
 				img.set_pixel(x, y, 255, 255, 255, 0);
 		}
-	img.write("output.bmp");
+	img.write("output_grid.bmp");
 	std::cout << "Image written" << std::endl;
 }
 
@@ -137,7 +137,7 @@ void Decoder::decodeTrace(char* buffer, int size)
 {
 	//int count = *reinterpret_cast<unsigned short*>(&buffer[0]);	// TODO: remove this line after next upload
 	//std::cout << 2 * count + 2 << " bytes expected" << std::endl;	// TODO: remove this line after next upload
-	buffer = &buffer[sizeof(short)];								// TODO: remove this line after next upload
+	//buffer = &buffer[sizeof(short)];								// TODO: remove this line after next upload
 
 	std::vector<Point> points;
 	points.emplace_back(0, 0);
@@ -169,20 +169,27 @@ void Decoder::decodeTrace(char* buffer, int size)
 	int width = maxs.x - mins.x;
 	int height = maxs.y - mins.y;
 	BMP::BMP img(width+2*margin, height+2*margin, false);
-	img.fill_region(0, 0, width, height, 255, 255, 255, 0);
+	img.fill_region(0, 0, width + 2 * margin, height + 2 * margin, 255, 255, 255, 0);	// set background to white
 	for (Point& p : points)
 	{
 		p.x += margin - mins.x;
 		p.y += margin - mins.y;
 	}
-	img.set_pixel(points[0].x, points[0].y, 255, 0, 0, 0);
 	for (Point& p : points)
 	{
-		img.set_pixel(p.x + 1, p.y, 0, 0, 0, 0);
-		img.set_pixel(p.x - 1, p.y, 0, 0, 0, 0);
-		img.set_pixel(p.x, p.y + 1, 0, 0, 0, 0);
-		img.set_pixel(p.x, p.y - 1, 0, 0, 0, 0);
+		drawCirc(img, p, 3);
 	}
-	img.set_pixel(points.back().x, points.back().y, 0, 255, 255, 0);
-	img.write("output.bmp");
+	img.fill_region(points[0].x - 3,   points[0].y - 3,   7, 7, 255, 0, 0, 0);	// colour first point
+	img.fill_region(points.back().x-3, points.back().y-3, 7, 7, 0, 255, 0, 0);// colour final point
+	img.write("output_trace.bmp");
+}
+
+void Decoder::drawCirc(BMP::BMP& img, Point c, int r)
+{
+	int len = 2 * r + 1;
+	img.fill_region(c.x-r, c.y-r-1, len, 1, 0, 0, 0, 0); // top
+	img.fill_region(c.x-r, c.y+r+1, len, 1, 0, 0, 0, 0); // bottom
+	
+	img.fill_region(c.x-r-1, c.y-r, 1, len, 0, 0, 0, 0); // top
+	img.fill_region(c.x+r+1, c.y-r, 1, len, 0, 0, 0, 0); // top
 }
