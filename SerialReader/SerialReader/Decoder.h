@@ -9,12 +9,14 @@ namespace Decoder
 	void decodeGrid(char* buffer, int size);
 	void decodeGridAlt(char* buffer, int size);
 	void decodeTrace(char* buffer, int size);
+	void decodeTraceAlt(char* buffer, int size);
 
 	enum opcodes : char
 	{
 		OP_GRID = 'G',
 		OP_GRID_ALT = 'H',
 		OP_TRACE = 'T',
+		OP_TRACE_ALT = 'S',
 		OP_EVENTS = 'E'
 	};
 	struct Point

@@ -11,9 +11,14 @@ void Trace::addPoint(int x, int y)
   int diff_y = y - last_y;
   if(diff_x == 0 && diff_y == 0)
     return;
+  if(diff_x > 255 || diff_y > 255)
+    digitalWrite(PIN_BUZZ, HIGH);
+  else
+    digitalWrite(PIN_BUZZ, LOW);
+  
     
-  points_x[count] = diff_x;
-  points_y[count] = diff_y;
+  points_x[count] = static_cast<char>(diff_x);
+  points_y[count] = static_cast<char>(diff_y);
   ++count;
   last_x = x;
   last_y = y;
@@ -23,12 +28,23 @@ void Trace::dump()
 {
   load();
     
-  Serial.write('T');
+  // FOR SOME REASON, serial is inconsistent between Arduino and CPP when handling binary. 
+//  Serial.write('T');
+//  for(int i = 0; i < count; ++i)
+//  {
+//    Serial.write(points_x[i]);
+//    Serial.write(points_y[i]);
+//  }
+
+// I hate this so much
+  Serial.write('S');
   for(int i = 0; i < count; ++i)
   {
-    Serial.write(points_x[i]);
-    Serial.write(points_y[i]);
-  }
+    Serial.print(" ");
+    Serial.print((int)points_x[i]);
+    Serial.print("_");
+    Serial.print((int)points_y[i]);
+  }  
 }
 
 void Trace::save()

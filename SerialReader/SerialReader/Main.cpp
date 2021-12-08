@@ -5,13 +5,16 @@
 #include "Serial.h"
 #include "Timer.h"
 #include "Decoder.h"
+#include <cstdint>
+#include <bitset>
 
 #define PICK_COM false
 #define SERIAL_BUFFER_SIZE 1024u
 // Arduino leonardo mem is only 2600 bytes
 // 2600 * 8
-#define MESSAGE_BUFFER_SIZE 100000u
-#define EMPTY_BUFFER_MAX_TICKS 5
+//#define MESSAGE_BUFFER_SIZE 100000u
+#define MESSAGE_BUFFER_SIZE 2600
+#define EMPTY_BUFFER_MAX_TICKS 3
 
 void saveToFile(char* buffer, int length)
 {
@@ -106,6 +109,12 @@ int main()
     // one-shot program, don't need to worry about resetting the above loop environment
 
     std::cout << msg_len << " bytes recieved" << std::endl;
+    for (unsigned int i = 0; i < msg_len; ++i)
+    {
+        std::cout << std::bitset<8>(msg_buffer[i]).to_string() << " ";
+    }
+    std::cout << std::endl;
+    msg_buffer[msg_len] = '\0'; // Cap the end of the buffer, just in case there was preset mem
     Decoder::decode(msg_buffer, msg_len);
 
     delete port;

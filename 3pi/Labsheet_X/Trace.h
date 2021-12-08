@@ -5,7 +5,7 @@
 
 // Another memory limitation. Need to know the 
 #define BYTES 1024 // 1 KB of NVM // 2 bytes reserved stop code
-#define TRACE_TIME 3000 // 3 seconds
+#define TRACE_TIME 500 // 0.5 seconds
 /*
  * If the trace were recoreded in chars rather than shorts, then the length of the trace could be doubled,
  * but it would need to be rounded to the nearest centimeter instead of the nearest millimeter

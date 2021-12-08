@@ -1,6 +1,7 @@
 #include "Decoder.h"
 #include <stdexcept>
 #include "bitmap_format.h"
+#include <string>
 
 
 void Decoder::decode(char* buffer, int size)
@@ -25,12 +26,21 @@ void Decoder::decode(char* buffer, int size)
 		std::cout << "decode: Trace" << std::endl;
 		decodeTrace(buffer, size);
 		break;
+	case OP_TRACE_ALT:
+		std::cout << "decode: Trace2" << std::endl;
+		decodeTraceAlt(buffer, size);
+		break;
 	case OP_EVENTS:
 		throw std::invalid_argument("Opcode not yet implemented");
 		break;
 	default:
 		//throw std::invalid_argument("Invalid opcode value");
-		std::cout << "invalid opcode"  << opcode << std::endl;
+		std::cout << "invalid opcode, printing:\n";
+		for (unsigned int i = 0; i < size; ++i)
+		{
+			std::cout << buffer[i];
+		}
+		std::cout << std::endl;
 		return;
 		break;
 	}
@@ -135,20 +145,25 @@ void Decoder::decodeGridAlt (char* buffer, int size)
 
 void Decoder::decodeTrace(char* buffer, int size)
 {
+	for (int i = 0; i < size; i += 2)
+	{
+		std::cout << (int)buffer[i] << "_" << (int)buffer[i + 1] << std::endl;
+	}
+	std::cout << std::endl;
+
 	std::vector<Point> points;
 	points.emplace_back(0, 0);
 	Point mins, maxs;
-	for (int i = 0; i < size - sizeof(short); i += 2)
+	for (int i = 0; i < size; i += 2)
 	{
 		points.emplace_back((int)buffer[i], (int)buffer[i + 1]);
+		if (points.back() == Point(0, 0))
+		{
+			std::cout << "Hit exit bytecode (" << points.back().x << " " << points.back().y << ") at address: " << i << std::endl; // Warning
+			continue;
+		}
 		points.back() = points.back() + points[points.size() - 2]; // add this vec to the previous point to get the new point
 		std::cout << "\t" << points.back().x << "\t" << points.back().y << std::endl;
-		if (points.back() == points[points.size() - 2])
-		{
-			std::cout << "Hit exit bytecode at address: " << i << std::endl;
-			points.pop_back();
-			break; // Hit the exit code. This should just be a redundant safeguard though
-		}
 
 		if (points.back().x < mins.x)
 			mins.x = points.back().x;
@@ -177,6 +192,74 @@ void Decoder::decodeTrace(char* buffer, int size)
 	img.fill_region(points[0].x - 3,   points[0].y - 3,   7, 7, 255, 0, 0, 0);	// colour first point
 	img.fill_region(points.back().x-3, points.back().y-3, 7, 7, 0, 255, 0, 0);// colour final point
 	img.write("output_trace.bmp");
+}
+
+void Decoder::decodeTraceAlt(char* buffer, int size)
+{
+	buffer[0] = 0;
+	buffer = &buffer[1]; // trim initial delimiter from the buffer
+
+	std::vector<Point> points;
+	points.emplace_back(0, 0);
+	Point mins, maxs;
+	// convert buffer to a string
+	std::string s = buffer;
+	// Delimit the string into vectors
+	size_t pos = 0;
+	std::string pair;
+	while ((pos = s.find(' ')) != std::string::npos) {
+		pair = s.substr(0, pos);
+		s.erase(0, pos + 1);
+		// extract values from the pair
+		pos = pair.find('_');
+		if (pos == std::string::npos)
+		{
+			std::cout << "invalid pair substring (" << pair << ")" << std::endl;
+			continue;
+		}
+		points.emplace_back(
+			-std::stoi(pair.substr(0, pos)),  // X axis is flipped, this is just for the render to match
+			std::stoi(pair.substr(pos + 1)) );
+		
+		
+		// same as implementation for Binary decode from here on
+		if (points.back() == Point(0, 0))
+		{
+			std::cout << "Hit exit bytecode (" << points.back().x << " " << points.back().y << ") at address: " << points.size() << std::endl; // Warning
+			continue;
+		}
+		points.back() = points.back() + points[points.size() - 2]; // add this vec to the previous point to get the new point
+		std::cout << "\t" << points.back().x << "\t" << points.back().y << std::endl;
+
+		if (points.back().x < mins.x)
+			mins.x = points.back().x;
+		else if (points.back().x > maxs.x)
+			maxs.x = points.back().x;
+		if (points.back().y > maxs.y)
+			maxs.y = points.back().y;
+		else if (points.back().y < mins.y)
+			mins.y = points.back().y;
+	}
+
+	std::cout << "Drawing " << points.size() << " points" << std::endl;
+	const int margin = 10;
+	int width = maxs.x - mins.x;
+	int height = maxs.y - mins.y;
+	BMP::BMP img(width+2*margin, height+2*margin, false);
+	img.fill_region(0, 0, width + 2 * margin, height + 2 * margin, 255, 255, 255, 0);	// set background to white
+	for (Point& p : points)
+	{
+		p.x += margin - mins.x;
+		p.y += margin - mins.y;
+	}
+	for (Point& p : points)
+	{
+		drawCirc(img, p, 3);
+	}
+	img.fill_region(points[0].x - 3,   points[0].y - 3,   7, 7, 255, 0, 0, 0);	// colour first point
+	img.fill_region(points.back().x-3, points.back().y-3, 7, 7, 0, 255, 0, 0);// colour final point
+	img.write("output_trace.bmp");
+	std::cout << "Image saved" << std::endl;
 }
 
 void Decoder::drawCirc(BMP::BMP& img, Point c, int r)
