@@ -94,18 +94,15 @@ public:
       //Serial.println(" R ");
     #endif
 
-    // GRID MAPPING
+    // MAPPING
 #if MAPPING_GRID
-    grid->setTile(x, y); // track bot position, rather than line position
-
-#elif MAPPING_TRACE
-    if(trace->timer())
-    {
-      trace->addPoint(round(x), round(y));
-    }
+    grid->setTile(x, y);
+#elif MAPPING_EVENT
+    trace->addPoint(round(x), round(y), rot);
+#else
+    trace->addPoint(round(x), round(y));
 #endif
-  }
-  
+  }  
   
   float x = 0;
   float y = 0;

@@ -2,14 +2,18 @@
 #if MAPPING_TRACE
 # include <EEPROM.h>
 
+#if MAPPING_EVENT
+void Trace::addPoint(int x, int y, double theta)
+#else
 void Trace::addPoint(int x, int y)
+#endif
 {
   if(count >= BYTES/2)
     return;
     
   int diff_x = x - last_x;
   int diff_y = y - last_y;
-  if(diff_x == 0 && diff_y == 0)
+  if(diff_x * diff_x + diff_y * diff_y < MIN_DIST_SQR)
     return;
   if(diff_x > 255 || diff_y > 255)
     digitalWrite(PIN_BUZZ, HIGH);
@@ -22,6 +26,9 @@ void Trace::addPoint(int x, int y)
   ++count;
   last_x = x;
   last_y = y;
+#if MAPPING_EVENT
+  last_theta = theta;
+#endif
 
 }
 void Trace::dump()
@@ -99,6 +106,11 @@ void Trace::load()
       break;
     }
   }
+}
+
+bool threshold(double theta)
+{
+  if(theta > THETA_THRESHOLD)
 }
 
 bool Trace::timer()

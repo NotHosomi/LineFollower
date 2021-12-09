@@ -12,7 +12,7 @@
 // Mapping types
 #define MAPPING_GRID false
 #define MAPPING_TRACE true
-#define MAPPING_EVENTS false
+#define MAPPING_EVENTS true
 
 #define LINETURN_ALPHA true
 #define TURN_AGGRESSION 0.5
