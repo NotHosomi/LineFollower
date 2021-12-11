@@ -5,13 +5,18 @@
 #include "Serial.h"
 #include "Timer.h"
 #include "Decoder.h"
+#include <cstdint>
+#include <bitset>
 
 #define PICK_COM false
 #define SERIAL_BUFFER_SIZE 1024u
 // Arduino leonardo mem is only 2600 bytes
 // 2600 * 8
-#define MESSAGE_BUFFER_SIZE 100000u
-#define EMPTY_BUFFER_MAX_TICKS 5
+//#define MESSAGE_BUFFER_SIZE 100000u
+#define MESSAGE_BUFFER_SIZE 2600
+#define EMPTY_BUFFER_MAX_TICKS 3
+
+Decoder decoder;
 
 void saveToFile(char* buffer, int length)
 {
@@ -25,7 +30,18 @@ int main()
 {
     std::cout << "Hello World!\n";
 
-
+    // open a map file
+    std::string in;
+    while (1)
+    {
+        std::cout << "\nMap: ";
+        std::cin >> in;
+        if (decoder.loadMap(in[0]))
+            break;
+        else
+            std::cout << "invalid map" << std::endl;
+    }
+    std::cout << "map loaded" << std::endl;
 
     // Open port
     Serial* port;
@@ -106,7 +122,13 @@ int main()
     // one-shot program, don't need to worry about resetting the above loop environment
 
     std::cout << msg_len << " bytes recieved" << std::endl;
-    Decoder::decode(msg_buffer, msg_len);
+    for (unsigned int i = 0; i < msg_len; ++i)
+    {
+        std::cout << std::bitset<8>(msg_buffer[i]).to_string() << " ";
+    }
+    std::cout << std::endl;
+    msg_buffer[msg_len] = '\0'; // Cap the end of the buffer, just in case there was preset mem
+    decoder.decode(msg_buffer, msg_len);
 
     delete port;
     return 0;

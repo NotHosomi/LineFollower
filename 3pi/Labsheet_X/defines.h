@@ -12,12 +12,13 @@
 // Mapping types
 #define MAPPING_GRID false
 #define MAPPING_TRACE true
-#define MAPPING_EVENTS false
+#define MAPPING_EVENT false
 
 #define LINETURN_ALPHA true
 #define TURN_AGGRESSION 0.5
-#define GAMEOVER_THRESHOLD 45000 // 45 seconds
 #define SPEED 20
+#define START_DELAY 5000
+#define GAMEOVER_THRESHOLD 2000 + START_DELAY // 7 seconds
 
 // Pins
 #define LED_PIN_Y 13

@@ -94,66 +94,15 @@ public:
       //Serial.println(" R ");
     #endif
 
-    // GRID MAPPING
+    // MAPPING
 #if MAPPING_GRID
-//    if(gsv[GSLL] < -0.5)
-//      grid->setTile(x + LSO_OUTER_X*cos(rot), y - LSO_OUTER_Y*sin(rot));
-//    if(gsv[GSL] < -0.5)
-//      grid->setTile(x + LSO_INNER_X*cos(rot), y - LSO_INNER_Y*sin(rot));
-//    if(gsv[GSC] < -0.5)
-//      grid->setTile(x + LSO_CENTER_X*cos(rot), y);
-//    if(gsv[GSR] < -0.5)
-//      grid->setTile(x + LSO_INNER_X*cos(rot), y + LSO_INNER_Y*sin(rot));
-//    if(gsv[GSRR] < -0.5)
-//      grid->setTile(x + LSO_OUTER_X*cos(rot), y + LSO_OUTER_Y*sin(rot));
-    
-    grid->setTile(x, y); // track bot position, rather than line position
-
-#elif MAPPING_TRACE
-//    float avg_x = 0;
-//    float avg_y = 0;
-//  
-//    int hits = 0;
-//    if(gsv[GSLL] < -0.5)
-//    {
-//      avg_x += LSO_OUTER_X*cos(rot);
-//      avg_y += LSO_OUTER_Y*sin(rot);
-//      ++hits;
-//    }
-//    if(gsv[GSL] < -0.5)
-//    {
-//      avg_x +=  LSO_INNER_X*cos(rot);
-//      avg_y += LSO_INNER_Y*sin(rot);
-//      ++hits;
-//    }
-//    if(gsv[GSC] < -0.5)
-//    {
-//      avg_x += LSO_OUTER_X*cos(rot);
-//      ++hits;
-//    }
-//    if(gsv[GSR] < -0.5)
-//    {
-//      avg_x += LSO_INNER_X;
-//      avg_y += LSO_INNER_Y*sin(rot);
-//      ++hits;
-//    }
-//    if(gsv[GSRR] < -0.5)
-//    {
-//      avg_x += LSO_OUTER_X*cos(rot);
-//      avg_y += LSO_OUTER_Y;
-//      ++hits;
-//    } 
-//    avg_x /= hits;
-//    avg_y /= hits;
-//    avg_x += x;
-//    avg_y += y;
-    if(trace->timer())
-    {
-      trace->addPoint(round(x), round(y));
-    }
+    grid->setTile(x, y);
+#elif MAPPING_EVENT
+    trace->addPoint(round(x), round(y), rot);
+#else
+    trace->addPoint(round(x), round(y));
 #endif
-  }
-  
+  }  
   
   float x = 0;
   float y = 0;

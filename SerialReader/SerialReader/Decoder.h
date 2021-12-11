@@ -1,19 +1,25 @@
 #pragma once
 #include <vector>
+#include "bitmap_format.h"
 
-namespace Decoder
+class Decoder
 {
+public:
 	void decode(char* buffer, int size);
+	bool loadMap(char mapid);
 
+private:
 	void decodeGrid(char* buffer, int size);
 	void decodeGridAlt(char* buffer, int size);
 	void decodeTrace(char* buffer, int size);
+	void decodeTraceAlt(char* buffer, int size);
 
 	enum opcodes : char
 	{
 		OP_GRID = 'G',
 		OP_GRID_ALT = 'H',
 		OP_TRACE = 'T',
+		OP_TRACE_ALT = 'S',
 		OP_EVENTS = 'E'
 	};
 	struct Point
@@ -38,5 +44,15 @@ namespace Decoder
 			return x == rhs.x && y == rhs.y;
 		}
 	};
+
+	void drawCirc(BMP::BMP& img, Point c, int r);
+
+	void score(std::vector<Point> path, BMP::BMP& img);
+	std::string getFilename();
+
+	char op;
+	std::vector<Point> waypoints;
+	char mapid;
+	std::string filename;
 };
 
