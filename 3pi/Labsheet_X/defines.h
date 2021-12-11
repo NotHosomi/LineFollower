@@ -7,12 +7,12 @@
 #define DEBUG_FSM_C  false
 #define DEBUG_MOTORS false
 #define DEBUG_ENCODE false
-#define DEBUG_ODO    false
+#define DEBUG_ODO    true
 
 // Mapping types
 #define MAPPING_GRID false
 #define MAPPING_TRACE true
-#define MAPPING_EVENTS true
+#define MAPPING_EVENT true
 
 #define LINETURN_ALPHA true
 #define TURN_AGGRESSION 0.5

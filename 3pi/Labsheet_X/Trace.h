@@ -4,12 +4,18 @@
 #include <Arduino.h>
 
 // Another memory limitation. Need to know the 
-#define BYTES 1024 // 1 KB of NVM // 2 bytes reserved stop code
+#define BYTES 1024 // 1 KB of NVM
 // Time based:
 #define TRACE_TIME 500 // 0.5 seconds
 // Event based:
-#define THETA_THRESHOLD pi/6 // 30 degrees  // whats the angle between the L and R sensors
-#define MIN_DIST_SQR = 100 // Only take a sample if the bot has travelled at least a centimeter
+#define THETA_THRESHOLD 40 * PI/180
+#define MIN_DIST_SQR 100 // Only take a sample if the bot has travelled at least a centimeter
+
+#if MAPPING_EVENT
+  #define vec_t short
+#else
+  #define vec_t char
+#endif  
 
 /*
  * If the trace were recoreded in chars rather than shorts, then the length of the trace could be doubled,
@@ -35,8 +41,8 @@ public:
   bool timer();
 #endif
 private:
-  char points_x[BYTES/2 + 2];
-  char points_y[BYTES/2 + 2];
+  vec_t points_x[BYTES/(2*sizeof(vec_t)) + 2];
+  vec_t points_y[BYTES/(2*sizeof(vec_t)) + 2];
   int last_x = 0;
   int last_y = 0;
   bool loaded = false;

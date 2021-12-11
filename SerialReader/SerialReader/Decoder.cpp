@@ -2,17 +2,19 @@
 #include <stdexcept>
 #include "bitmap_format.h"
 #include <string>
+#include <chrono>
 
 
 void Decoder::decode(char* buffer, int size)
 {
-	char opcode = buffer[0];
+	op = buffer[0];
 	// trim the opcode from the buffer
 	buffer[0] = 0;
 	buffer = &buffer[1];
 	--size;
 
-	switch (opcode)
+	filename = getFilename(); // generate the filename to save data to
+	switch (op)
 	{
 	case OP_GRID:
 		std::cout << "decode: Grid" << std::endl;
@@ -27,14 +29,11 @@ void Decoder::decode(char* buffer, int size)
 		decodeTrace(buffer, size);
 		break;
 	case OP_TRACE_ALT:
+	case OP_EVENTS:
 		std::cout << "decode: Trace2" << std::endl;
 		decodeTraceAlt(buffer, size);
 		break;
-	case OP_EVENTS:
-		throw std::invalid_argument("Opcode not yet implemented");
-		break;
 	default:
-		//throw std::invalid_argument("Invalid opcode value");
 		std::cout << "invalid opcode, printing:\n";
 		for (unsigned int i = 0; i < size; ++i)
 		{
@@ -218,8 +217,8 @@ void Decoder::decodeTraceAlt(char* buffer, int size)
 			continue;
 		}
 		points.emplace_back(
-			-std::stoi(pair.substr(0, pos)),  // X axis is flipped, this is just for the render to match
-			std::stoi(pair.substr(pos + 1)) );
+			std::stoi(pair.substr(0, pos)),
+			-std::stoi(pair.substr(pos + 1)) );
 		
 		
 		// same as implementation for Binary decode from here on
@@ -240,6 +239,24 @@ void Decoder::decodeTraceAlt(char* buffer, int size)
 		else if (points.back().y < mins.y)
 			mins.y = points.back().y;
 	}
+	for (auto w : waypoints)
+	{
+		if (w.x < mins.x)
+			mins.x = w.x;
+		else if (w.x > maxs.x)
+			maxs.x = w.x;
+		if (w.y > maxs.y)
+			maxs.y = w.y;
+		else if (w.y < mins.y)
+			mins.y = w.y;
+	}
+	// save positions to a log file, just in case
+	std::ofstream logfile((filename + ".log").c_str());
+	for (auto p : points)
+	{
+		logfile << p.x << " " << p.y << "\n";
+	}
+	logfile.close();
 
 	std::cout << "Drawing " << points.size() << " points" << std::endl;
 	const int margin = 10;
@@ -247,6 +264,17 @@ void Decoder::decodeTraceAlt(char* buffer, int size)
 	int height = maxs.y - mins.y;
 	BMP::BMP img(width+2*margin, height+2*margin, false);
 	img.fill_region(0, 0, width + 2 * margin, height + 2 * margin, 255, 255, 255, 0);	// set background to white
+
+	// draw waypoints
+	for (Point& w : waypoints)
+	{
+		w.x += margin - mins.x;
+		w.y += margin - mins.y;
+		drawCirc(img, w, 3);
+		img.fill_region(w.x - 3, w.y - 3, 7, 7, 255, 0, 0, 0);
+	}
+
+	// draw path
 	for (Point& p : points)
 	{
 		p.x += margin - mins.x;
@@ -258,7 +286,11 @@ void Decoder::decodeTraceAlt(char* buffer, int size)
 	}
 	img.fill_region(points[0].x - 3,   points[0].y - 3,   7, 7, 255, 0, 0, 0);	// colour first point
 	img.fill_region(points.back().x-3, points.back().y-3, 7, 7, 0, 255, 0, 0);// colour final point
-	img.write("output_trace.bmp");
+
+	// score the waypoints
+	score(points, img);
+
+	img.write((filename + ".bmp").c_str());
 	std::cout << "Image saved" << std::endl;
 }
 
@@ -270,4 +302,85 @@ void Decoder::drawCirc(BMP::BMP& img, Point c, int r)
 	
 	img.fill_region(c.x-r-1, c.y-r, 1, len, 0, 0, 0, 0); // top
 	img.fill_region(c.x+r+1, c.y-r, 1, len, 0, 0, 0, 0); // top
+}
+
+// Evauation
+bool Decoder::loadMap(char mapid)
+{
+	std::string addr = "maps/";
+	addr += mapid;
+	addr += ".txt";
+	std::ifstream map(addr);
+	if (!map)
+	{
+		std::cout << "Address " << addr << " not found";
+		return false;
+	}
+		
+	int x, y;
+	while (map >> x >> y)
+	{
+		waypoints.emplace_back(x, y);
+	}
+	this->mapid = mapid;
+	return true;
+}
+
+void Decoder::score(std::vector<Point> path, BMP::BMP& img)
+{
+	std::vector<float> scores;
+	for (auto w : waypoints)
+	{
+		Point closest_p;
+		scores.push_back(100000000000.0f); // just an absurdly large number
+		for (auto p : path)
+		{
+			int diff_x = w.x - p.x;
+			int diff_y = w.y - p.y;
+			float diff_sqr = diff_x * diff_x + diff_y * diff_y;
+			if (diff_sqr < scores.back())
+			{
+				scores.back() = diff_sqr;
+				closest_p = p;
+			}
+		}
+		img.fill_region(closest_p.x - 3, closest_p.y - 3, 7, 7, 255, 0, 255, 0); // shade points closest to each waypoint
+	}
+	if (scores.size() == 0)
+		return;
+
+	std::ofstream scorefile(filename + "_score.txt");
+	std::cout << "Scores: \n";
+	float sum = 0;
+	for (float& s : scores)
+	{
+		s = sqrt(s);
+		std::cout << s << std::endl;
+		sum += s;
+		scorefile << s << "\n";
+	}
+	sum = sum / scores.size();
+	std::cout << "Avrg: " << sum;
+	scorefile << sum << "\n";
+	scorefile.close();
+}
+
+std::string Decoder::getFilename()
+{
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+	time_t tt = std::chrono::system_clock::to_time_t(now);
+	tm time;
+	localtime_s(&time, &tt);
+	std::string filename = "data_";
+	filename += op; 
+	filename += "/";
+	filename += mapid;
+	filename += "/"
+		+ std::to_string(time.tm_year + 1900) + "-"
+		+ std::to_string(time.tm_mon + 1) + "-"
+		+ std::to_string(time.tm_mday) + "_"
+		+ std::to_string(time.tm_hour) + "-"
+		+ std::to_string(time.tm_min) + "-"
+		+ std::to_string(time.tm_sec);
+	return filename;
 }

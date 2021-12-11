@@ -16,6 +16,8 @@
 #define MESSAGE_BUFFER_SIZE 2600
 #define EMPTY_BUFFER_MAX_TICKS 3
 
+Decoder decoder;
+
 void saveToFile(char* buffer, int length)
 {
     std::ofstream file;
@@ -28,7 +30,18 @@ int main()
 {
     std::cout << "Hello World!\n";
 
-
+    // open a map file
+    std::string in;
+    while (1)
+    {
+        std::cout << "\nMap: ";
+        std::cin >> in;
+        if (decoder.loadMap(in[0]))
+            break;
+        else
+            std::cout << "invalid map" << std::endl;
+    }
+    std::cout << "map loaded" << std::endl;
 
     // Open port
     Serial* port;
@@ -115,7 +128,7 @@ int main()
     }
     std::cout << std::endl;
     msg_buffer[msg_len] = '\0'; // Cap the end of the buffer, just in case there was preset mem
-    Decoder::decode(msg_buffer, msg_len);
+    decoder.decode(msg_buffer, msg_len);
 
     delete port;
     return 0;
