@@ -284,8 +284,8 @@ void Decoder::decodeTraceAlt(char* buffer, int size)
 	{
 		drawCirc(img, p, 3);
 	}
-	img.fill_region(points[0].x - 3,   points[0].y - 3,   7, 7, 255, 0, 0, 0);	// colour first point
-	img.fill_region(points.back().x-3, points.back().y-3, 7, 7, 0, 255, 0, 0);// colour final point
+	img.fill_region(points[0].x - 3,   points[0].y - 3,   7, 7, 0, 255, 0, 0);	// colour first point
+	img.fill_region(points.back().x-3, points.back().y-3, 7, 7, 0, 0, 255, 0);// colour final point
 
 	// score the waypoints
 	score(points, img);
@@ -360,8 +360,9 @@ void Decoder::score(std::vector<Point> path, BMP::BMP& img)
 		scorefile << s << "\n";
 	}
 	sum = sum / scores.size();
-	std::cout << "Avrg: " << sum;
+	std::cout << "Avrg: " << sum << std::endl;
 	scorefile << sum << "\n";
+	scorefile << path.size() << "\n";
 	scorefile.close();
 }
 

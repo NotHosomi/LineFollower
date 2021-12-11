@@ -11,20 +11,17 @@ void Trace::addPoint(int x, int y)
   if(count >= BYTES/sizeof(vec_t))
     return;
 
-#if MAPPING_EVENT
-  if(abs(theta - last_theta) < THETA_THRESHOLD)
-    return;
-#endif
   int diff_x = x - last_x;
   int diff_y = y - last_y;
   if(diff_x * diff_x + diff_y * diff_y < MIN_DIST_SQR)
     return;
-  if(diff_x > 255 || diff_y > 255)
-    digitalWrite(PIN_BUZZ, HIGH);
-  else
-    digitalWrite(PIN_BUZZ, LOW);
+#if MAPPING_EVENT
+  digitalWrite(PIN_BUZZ, LOW);
+  if(abs(theta - last_theta) < THETA_THRESHOLD)
+    return;
+  digitalWrite(PIN_BUZZ, HIGH);
+#endif
   
-    
   points_x[count] = static_cast<vec_t>(diff_x);
   points_y[count] = static_cast<vec_t>(diff_y);
   ++count;
@@ -113,8 +110,8 @@ void Trace::load()
   for(int i = 0; i < BYTES/sizeof(vec_t); ++i)
   {
   #if MAPPING_EVENT
-    char byte1 = EEPROM.read(address++);
-    char byte2 = EEPROM.read(address++);
+    short byte1 = EEPROM.read(address++);
+    short byte2 = EEPROM.read(address++);
     points_x[i] = (byte1 << 8) + byte2;
     
     byte1 = EEPROM.read(address++);

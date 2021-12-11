@@ -8,7 +8,7 @@
 // Time based:
 #define TRACE_TIME 500 // 0.5 seconds
 // Event based:
-#define THETA_THRESHOLD 40 * PI/180
+#define THETA_THRESHOLD 15 * PI/180
 #define MIN_DIST_SQR 100 // Only take a sample if the bot has travelled at least a centimeter
 
 #if MAPPING_EVENT
